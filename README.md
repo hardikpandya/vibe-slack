@@ -1,56 +1,77 @@
-# Chat Ops Slack - AIOps Communication Interface
+# Slack Interface Prototype
 
-A pixel-perfect Slack clone interface built specifically for IT Operations and AIOps (Artificial Intelligence for IT Operations) teams. This project provides a full-screen Slack-like communication interface that integrates seamlessly with incident management, alerting, and operational workflows.
+A feature-rich, pixel-perfect Slack clone interface built with React and TypeScript. This prototype demonstrates a fully functional communication platform with channels, direct messages, rich media support, and contextual interactions.
 
 ## 🎯 Overview
 
-This is a prototype demonstration of how modern IT operations teams can leverage Slack-style communication interfaces for operational coordination. The interface replicates Slack's web UI with a dark theme, featuring channels, direct messages, and contextual chat histories tailored for DevOps and SRE workflows.
-
-**Key Focus**: This project showcases how communication tools can be embedded within AIOps platforms to provide seamless context switching between incident management, alerting, and team collaboration.
+This project is a comprehensive Slack-style communication interface prototype showcasing modern web UI/UX patterns, real-time messaging simulation, and rich interactive features. Perfect for demonstrating communication platform capabilities, UI/UX design patterns, or as a foundation for building custom chat applications.
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-### 🎨 UI/UX Features
+### 🎨 Interface & Design
 
 - **Pixel-Perfect Slack Replication**: Faithfully recreates Slack's web interface with dark theme
 - **Three-Panel Layout**:
-  - **Leftmost Panel**: Icon bar with Atlassian logo and user avatar
+  - **Leftmost Panel**: Icon bar with company logo and user avatar
   - **Left Sidebar**: Chat list with sticky header, scrollable content, and hidden scrollbars
   - **Right Panel**: Full chat interface with tabs, message history, and composer
 - **Dark Theme**: Matches Slack's dark mode color scheme (`#1a1d21`, `#000000`, `#2c2d30`)
-- **Lato Font Family**: Uses Lato font for typography matching Slack's aesthetic
+- **Custom Typography**: Uses Lato font family for typography matching Slack's aesthetic
 - **Smooth Scrolling**: Auto-scrolls to latest messages with smooth behavior
-- **Responsive Design**: Full-screen layout optimized for operational dashboards
+- **Responsive Design**: Full-screen layout optimized for modern displays
 
 ### 💬 Chat Features
 
-- **Multiple Chat Types**:
-  - **Starred Channels**: Pinned important channels (e.g., `#itom-4412`, `#incidents`, `#alerts`)
-  - **Direct Messages**: Individual DMs with avatars, status indicators, and emoji statuses
-  - **Group DMs**: Multi-person conversations with overlapping avatars
-  - **Channels**: Team channels organized by function (engineering, infrastructure, security, etc.)
+#### Multiple Chat Types
 
-- **Rich User Profiles**:
-  - **Avatars**: Square avatars with rounded corners (6px border-radius)
-  - **Online/Offline Status**: Green/grey dots positioned at bottom-right of avatars
-  - **Status Emojis**: Contextual emoji indicators (🏖️ vacation, 💬 available, 🚫 OOO, 🏠 WFH, etc.)
-  - **Unread Badges**: Blue badges showing unread message counts
+- **Starred Channels**: Pinned important channels for quick access
+- **Direct Messages**: Individual DMs with avatars, status indicators, and emoji statuses
+- **Group DMs**: Multi-person conversations with overlapping avatars
+- **Channels**: Team channels organized by function and department
 
-- **Message Features**:
-  - **Per-Chat History**: Each chat maintains its own independent message history
-  - **Contextual Messages**: Channel-specific and DM-specific message content
-  - **Avatar Display**: Shows avatars for new messages or when sender changes
-  - **Message Spacing**: Increased spacing (20px) between different senders
-  - **HTML Support**: Messages support HTML formatting and links
+#### Rich User Profiles
 
-### 🎯 Operational Context
+- **Avatars**: Square avatars with rounded corners (6px border-radius)
+- **Online/Offline Status**: Green/grey dots positioned at bottom-right of avatars
+- **Status Emojis**: Contextual emoji indicators (🏖️ vacation, 💬 available, 🚫 OOO, 🏠 WFH, etc.)
+- **Unread Badges**: Blue badges showing unread message counts
+- **Static Status**: User online/offline statuses remain consistent
 
-- **IT Operations Focus**: Channels and conversations tailored for DevOps/SRE teams
-- **Incident Management**: Dedicated channels for incidents, alerts, and change reviews
-- **Team Organization**: Channels organized by function (backend, frontend, infrastructure, security, etc.)
-- **AI Assistant Integration**: Rovo AI assistant available as a DM contact
+#### Message Features
+
+- **Per-Chat History**: Each chat maintains its own independent message history
+- **Contextual Messages**: Channel-specific and DM-specific message content
+- **Avatar Display**: Shows avatars for new messages or when sender changes
+- **Message Spacing**: Increased spacing (20px) between different senders
+- **HTML Support**: Messages support HTML formatting, links, and styled content
+- **Link Rendering**: Automatic URL detection and rendering as clickable links
+- **Rich Media**: Support for link embeds, file previews, and interactive content
+
+### 🎯 Interactive Features
+
+- **Message Reactions**: Emoji reactions on messages (👍, ❤️, 🎉, 🔥, etc.)
+- **Action Buttons**: Interactive buttons for approvals, rejections, and other actions
+- **Confirmation Messages**: Post-action confirmation messages with italic styling
+- **Keyboard Shortcuts**: 
+  - Press `P` to trigger leave request workflow
+  - Press `Q` to trigger expense report workflow
+- **Message Composer**: Rich text input with Enter to send
+- **Tab Navigation**: Switch between Messages, Threads, and Files tabs
+
+### 🤖 System Integrations
+
+- **AI Assistant**: Built-in AI assistant (Merc AI) for automated responses and contextual help
+- **HR System Integration**: Workday integration for HR-related tasks and approvals
+- **No Bot Status Badges**: System accounts (AI Assistant, HR System) don't show online/offline status
+
+### 🎨 Customization
+
+- **Company Branding**: Fully customizable company name, logo, and branding
+- **Team Configuration**: Customizable team members, roles, and avatars
+- **Channel Setup**: Flexible channel naming and organization
+- **Message Context**: Contextual message generation based on company and channel settings
 
 ---
 
@@ -87,20 +108,18 @@ This is a prototype demonstration of how modern IT operations teams can leverage
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd chat-ops-slack
+cd vibe-slack
 
 # Install dependencies
 npm install
 
-# Start development server (runs with default Atlassian configuration)
+# Start development server
 npm run dev
 ```
 
 The application will start at `http://localhost:5180` and automatically navigate to `/slack`.
 
-**By default, the app runs with a fully populated Atlassian Slack instance** - no setup required!
-
-**📖 For detailed setup instructions, see [QUICKSTART.md](./QUICKSTART.md)**
+**By default, the app runs with a fully populated example configuration** - no setup required!
 
 ### Customization (Optional)
 
@@ -115,8 +134,6 @@ This interactive wizard will guide you through:
 - Your profile (name, nationality, role)
 - Team composition (nationalities - auto-generates team members)
 - Automatically infers channels, communication style, and topics
-
-**Works in both local environments and Replit!**
 
 ### Development Commands
 
@@ -134,20 +151,22 @@ npm run lint       # Run ESLint
 ## 📁 Project Structure
 
 ```
-chat-ops-slack/
+vibe-slack/
 ├── src/
 │   ├── pages/
 │   │   └── SlackPage.tsx          # Main Slack interface component
 │   ├── components/
-│   │   └── Layout.tsx              # App layout wrapper (minimal)
+│   │   └── Layout.tsx              # App layout wrapper
 │   ├── App.tsx                     # Root component with routing
 │   ├── main.tsx                    # Application entry point
-│   └── index.css                   # Global styles and font definitions
+│   ├── index.css                   # Global styles and font definitions
+│   ├── company.json                # Company configuration
+│   ├── people.json                 # Team members configuration
+│   └── channel-config.json         # Channel configuration
 ├── assets/                         # Static assets
 │   ├── fonts/                      # Lato font files
 │   ├── faces/                      # User avatar images
-│   ├── atlassian.svg              # Atlassian logo
-│   └── rovo-icon.svg              # Rovo AI assistant icon
+│   └── [logos and icons]           # Company logos and icons
 ├── public/                         # Public static assets
 ├── package.json                    # Dependencies and scripts
 ├── vite.config.ts                 # Vite configuration
@@ -169,9 +188,8 @@ chat-ops-slack/
 ### Chat Types
 
 #### Starred Channels
-- **Purpose**: Quick access to important operational channels
-- **Examples**: `#itom-4412` (incident), `#incidents`, `#alerts`
-- **Features**: Contextual incident-related messages
+- **Purpose**: Quick access to important channels
+- **Features**: Contextual channel-specific messages
 
 #### Direct Messages
 - **Individual DMs**: One-on-one conversations with team members
@@ -179,7 +197,7 @@ chat-ops-slack/
   - Avatar with online/offline status indicator
   - Status emoji (vacation, available, OOO, etc.)
   - Personal conversation history
-- **Special DM**: Rovo AI assistant for operational queries
+- **Special DMs**: AI assistant and HR system integrations
 
 #### Group DMs
 - **Purpose**: Multi-person conversations
@@ -187,19 +205,21 @@ chat-ops-slack/
 
 #### Channels
 - **Organization**: Channels organized by team/function
-- **Categories**:
-  - **Engineering**: `#engineering`, `#backend`, `#frontend`
-  - **Operations**: `#dev-ops`, `#infrastructure`, `#sre`, `#oncall`
-  - **Security**: `#security`
-  - **Deployment**: `#deployments`, `#ci-cd`, `#kubernetes`
-  - **Business**: `#product`, `#sales`, `#support`, `#marketing`
+- **Categories**: Engineering, Operations, Security, Deployment, Business, etc.
 
 ### Message Features
 
 - **Contextual History**: Each chat has its own message history
-- **Auto-Generated Messages**: Simulated incoming messages every 8-12 seconds for active chats
+- **Auto-Generated Messages**: Simulated incoming messages for active chats
 - **Message Formatting**: Supports HTML formatting, links, and styled content
 - **Avatar Display**: Shows avatars when sender changes or for new message groups
+- **Reactions**: Click emoji reactions to add your reaction to messages
+- **Link Embeds**: Automatic link detection and rich embed previews
+
+### Keyboard Shortcuts
+
+- **P Key**: Trigger leave request workflow (in HR system chat)
+- **Q Key**: Trigger expense report workflow (in HR system chat)
 
 ---
 
@@ -250,7 +270,8 @@ type SlackMsg = {
   id: string
   who: string      // Sender name
   text: string     // Message content (HTML supported)
-  when: string      // Timestamp
+  when: string     // Timestamp
+  actions?: Action[] // Optional action buttons
 }
 
 type ChatItem = {
@@ -272,8 +293,11 @@ const chatMessages: Record<string, SlackMsg[]>
 1. **Per-Chat Message History**: Each chat maintains independent message array
 2. **Contextual Message Generation**: Messages generated based on chat type and context
 3. **Auto-Scroll**: Automatically scrolls to bottom when new messages arrive
-4. **Sticky Header**: Atlassian header remains fixed while content scrolls
+4. **Sticky Header**: Header remains fixed while content scrolls
 5. **Hidden Scrollbars**: CSS hides scrollbars while maintaining scroll functionality
+6. **Link Detection**: Automatic URL detection and conversion to clickable links
+7. **Embed Support**: Rich link embeds with preview cards
+8. **Reaction System**: Emoji reactions with click handlers
 
 ### State Management
 
@@ -284,45 +308,24 @@ const chatMessages: Record<string, SlackMsg[]>
 
 ---
 
-## 🎯 Use Cases
+## 🚀 Deployment
 
-### IT Operations Teams
+### Vercel Deployment
 
-- **Incident Coordination**: Real-time communication during incidents
-- **Alert Discussion**: Collaborative discussion around alerts and anomalies
-- **Change Management**: Coordination for deployments and changes
-- **Team Collaboration**: Cross-functional team communication
+This project is configured for easy deployment on Vercel:
 
-### AIOps Integration
+1. **Via GitHub**:
+   - Push your code to GitHub
+   - Go to [vercel.com](https://vercel.com) and import your repository
+   - Vercel will auto-detect Vite and deploy
 
-- **Context Switching**: Seamless transition between alerts, incidents, and chat
-- **AI Assistant**: Direct access to Rovo AI assistant for operational queries
-- **Operational Context**: Channels and messages tailored for operational workflows
+2. **Via CLI**:
+   ```bash
+   npm i -g vercel
+   vercel
+   ```
 
----
-
-## 🚀 Future Enhancements
-
-### Planned Features
-
-- [ ] Thread support (currently UI-only)
-- [ ] File uploads and sharing
-- [ ] Real-time message synchronization
-- [ ] Search functionality
-- [ ] Notifications and mentions
-- [ ] Integration with external Slack workspaces
-- [ ] Message reactions and emoji picker
-- [ ] Rich text formatting toolbar
-- [ ] Voice/video call integration
-- [ ] Screen sharing capabilities
-
-### Integration Opportunities
-
-- **Atlassian Jira**: Link incidents and issues in messages
-- **Atlassian Confluence**: Share documentation links
-- **Monitoring Tools**: Embed alert details and metrics
-- **CI/CD Systems**: Show deployment status and logs
-- **Incident Management**: Direct integration with incident workflows
+The `vercel.json` configuration file handles build settings and SPA routing automatically.
 
 ---
 
@@ -361,7 +364,6 @@ This project is licensed under the MIT License.
 ## 🙏 Acknowledgments
 
 - **Slack** for design inspiration and UI patterns
-- **Atlassian** for design system principles
 - **React** and **TypeScript** communities for excellent tooling
 - **Lato Font** by Łukasz Dziedzic
 
@@ -375,6 +377,6 @@ For questions, issues, or contributions:
 
 ---
 
-**Built with ❤️ for the AIOps and DevOps community**
+**Built with ❤️ for the developer community**
 
-*A prototype demonstrating seamless integration of communication tools within operational platforms*
+*A comprehensive prototype demonstrating modern communication platform UI/UX patterns*
