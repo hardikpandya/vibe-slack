@@ -1,72 +1,72 @@
 # Slack Interface Prototype
 
-A feature-rich, pixel-perfect Slack clone interface built with React and TypeScript. This prototype demonstrates a fully functional communication platform with channels, direct messages, rich media support, and contextual interactions.
+A feature rich, pixel perfect Slack clone interface built with React and TypeScript. This prototype demonstrates a fully functional communication platform with channels, direct messages, rich media support, and contextual interactions.
 
-## 🎯 Overview
+## Overview
 
-This project is a comprehensive Slack-style communication interface prototype showcasing modern web UI/UX patterns, real-time messaging simulation, and rich interactive features. Perfect for demonstrating communication platform capabilities, UI/UX design patterns, or as a foundation for building custom chat applications.
+This project is a comprehensive Slack style communication interface prototype showcasing modern web UI/UX patterns, real time messaging simulation, and rich interactive features. Perfect for demonstrating communication platform capabilities, UI/UX design patterns, or as a foundation for building custom chat applications.
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-### 🎨 Interface & Design
+### Interface and Design
 
-- **Pixel-Perfect Slack Replication**: Faithfully recreates Slack's web interface with dark theme
-- **Three-Panel Layout**:
+- **Pixel Perfect Slack Replication**: Faithfully recreates Slack's web interface with dark theme
+- **Three Panel Layout**:
   - **Leftmost Panel**: Icon bar with company logo and user avatar
   - **Left Sidebar**: Chat list with sticky header, scrollable content, and hidden scrollbars
   - **Right Panel**: Full chat interface with tabs, message history, and composer
 - **Dark Theme**: Matches Slack's dark mode color scheme (`#1a1d21`, `#000000`, `#2c2d30`)
 - **Custom Typography**: Uses Lato font family for typography matching Slack's aesthetic
-- **Smooth Scrolling**: Auto-scrolls to latest messages with smooth behavior
-- **Responsive Design**: Full-screen layout optimized for modern displays
+- **Smooth Scrolling**: Auto scrolls to latest messages with smooth behavior
+- **Responsive Design**: Full screen layout optimized for modern displays
 
-### 💬 Chat Features
+### Chat Features
 
 #### Multiple Chat Types
 
 - **Starred Channels**: Pinned important channels for quick access
 - **Direct Messages**: Individual DMs with avatars, status indicators, and emoji statuses
-- **Group DMs**: Multi-person conversations with overlapping avatars
+- **Group DMs**: Multi person conversations with overlapping avatars
 - **Channels**: Team channels organized by function and department
 
 #### Rich User Profiles
 
-- **Avatars**: Square avatars with rounded corners (6px border-radius)
-- **Online/Offline Status**: Green/grey dots positioned at bottom-right of avatars
-- **Status Emojis**: Contextual emoji indicators (🏖️ vacation, 💬 available, 🚫 OOO, 🏠 WFH, etc.)
+- **Avatars**: Square avatars with rounded corners (6px border radius)
+- **Online Offline Status**: Green/grey dots positioned at bottom right of avatars
+- **Status Emojis**: Contextual emoji indicators (vacation, available, OOO, WFH, etc.)
 - **Unread Badges**: Blue badges showing unread message counts
 - **Static Status**: User online/offline statuses remain consistent
 
 #### Message Features
 
-- **Per-Chat History**: Each chat maintains its own independent message history
-- **Contextual Messages**: Channel-specific and DM-specific message content
+- **Per Chat History**: Each chat maintains its own independent message history
+- **Contextual Messages**: Channel specific and DM specific message content
 - **Avatar Display**: Shows avatars for new messages or when sender changes
 - **Message Spacing**: Increased spacing (20px) between different senders
 - **HTML Support**: Messages support HTML formatting, links, and styled content
 - **Link Rendering**: Automatic URL detection and rendering as clickable links
 - **Rich Media**: Support for link embeds, file previews, and interactive content
 
-### 🎯 Interactive Features
+### Interactive Features
 
-- **Message Reactions**: Emoji reactions on messages (👍, ❤️, 🎉, 🔥, etc.)
+- **Message Reactions**: Emoji reactions on messages
 - **Action Buttons**: Interactive buttons for approvals, rejections, and other actions
-- **Confirmation Messages**: Post-action confirmation messages with italic styling
+- **Confirmation Messages**: Post action confirmation messages with italic styling
 - **Keyboard Shortcuts**: 
   - Press `P` to trigger leave request workflow
   - Press `Q` to trigger expense report workflow
 - **Message Composer**: Rich text input with Enter to send
 - **Tab Navigation**: Switch between Messages, Threads, and Files tabs
 
-### 🤖 System Integrations
+### System Integrations
 
-- **AI Assistant**: Built-in AI assistant (Merc AI) for automated responses and contextual help
-- **HR System Integration**: Workday integration for HR-related tasks and approvals
+- **AI Assistant**: Built in AI assistant for automated responses and contextual help
+- **HR System Integration**: HR system integration for HR related tasks and approvals
 - **No Bot Status Badges**: System accounts (AI Assistant, HR System) don't show online/offline status
 
-### 🎨 Customization
+### Customization
 
 - **Company Branding**: Fully customizable company name, logo, and branding
 - **Team Configuration**: Customizable team members, roles, and avatars
@@ -75,7 +75,7 @@ This project is a comprehensive Slack-style communication interface prototype sh
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Core Technologies
 
@@ -85,18 +85,18 @@ This project is a comprehensive Slack-style communication interface prototype sh
 
 ### Styling
 
-- **CSS-in-JS**: Inline styles for component styling
+- **CSS in JS**: Inline styles for component styling
 - **Lato Font**: Custom font loading via `@font-face`
 - **Custom Scrollbar Hiding**: CSS to hide scrollbars while maintaining scroll functionality
 
 ### State Management
 
 - **React Hooks**: `useState`, `useRef`, `useEffect` for state management
-- **Message Database**: In-memory `Record<string, SlackMsg[]>` structure for per-chat histories
+- **Message Database**: In memory `Record<string, SlackMsg[]>` structure for per chat histories
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -132,7 +132,7 @@ npm run setup
 This interactive wizard will guide you through:
 - Company information (name, industry, size)
 - Your profile (name, nationality, role)
-- Team composition (nationalities - auto-generates team members)
+- Team composition (nationalities - auto generates team members)
 - Automatically infers channels, communication style, and topics
 
 ### Development Commands
@@ -148,7 +148,7 @@ npm run lint       # Run ESLint
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 vibe-slack/
@@ -176,7 +176,7 @@ vibe-slack/
 
 ---
 
-## 🎮 Usage Guide
+## Usage Guide
 
 ### Navigation
 
@@ -189,10 +189,10 @@ vibe-slack/
 
 #### Starred Channels
 - **Purpose**: Quick access to important channels
-- **Features**: Contextual channel-specific messages
+- **Features**: Contextual channel specific messages
 
 #### Direct Messages
-- **Individual DMs**: One-on-one conversations with team members
+- **Individual DMs**: One on one conversations with team members
 - **Features**: 
   - Avatar with online/offline status indicator
   - Status emoji (vacation, available, OOO, etc.)
@@ -200,7 +200,7 @@ vibe-slack/
 - **Special DMs**: AI assistant and HR system integrations
 
 #### Group DMs
-- **Purpose**: Multi-person conversations
+- **Purpose**: Multi person conversations
 - **Features**: Overlapping avatars showing group members
 
 #### Channels
@@ -210,7 +210,7 @@ vibe-slack/
 ### Message Features
 
 - **Contextual History**: Each chat has its own message history
-- **Auto-Generated Messages**: Simulated incoming messages for active chats
+- **Auto Generated Messages**: Simulated incoming messages for active chats
 - **Message Formatting**: Supports HTML formatting, links, and styled content
 - **Avatar Display**: Shows avatars when sender changes or for new message groups
 - **Reactions**: Click emoji reactions to add your reaction to messages
@@ -223,7 +223,7 @@ vibe-slack/
 
 ---
 
-## 🎨 Design Details
+## Design Details
 
 ### Color Palette
 
@@ -261,7 +261,7 @@ vibe-slack/
 
 ---
 
-## 🔧 Technical Implementation
+## Technical Implementation
 
 ### Message Database Structure
 
@@ -290,9 +290,9 @@ const chatMessages: Record<string, SlackMsg[]>
 
 ### Key Features Implementation
 
-1. **Per-Chat Message History**: Each chat maintains independent message array
+1. **Per Chat Message History**: Each chat maintains independent message array
 2. **Contextual Message Generation**: Messages generated based on chat type and context
-3. **Auto-Scroll**: Automatically scrolls to bottom when new messages arrive
+3. **Auto Scroll**: Automatically scrolls to bottom when new messages arrive
 4. **Sticky Header**: Header remains fixed while content scrolls
 5. **Hidden Scrollbars**: CSS hides scrollbars while maintaining scroll functionality
 6. **Link Detection**: Automatic URL detection and conversion to clickable links
@@ -308,7 +308,7 @@ const chatMessages: Record<string, SlackMsg[]>
 
 ---
 
-## 🚀 Deployment
+## Deployment
 
 ### Vercel Deployment
 
@@ -317,7 +317,7 @@ This project is configured for easy deployment on Vercel:
 1. **Via GitHub**:
    - Push your code to GitHub
    - Go to [vercel.com](https://vercel.com) and import your repository
-   - Vercel will auto-detect Vite and deploy
+   - Vercel will auto detect Vite and deploy
 
 2. **Via CLI**:
    ```bash
@@ -329,22 +329,22 @@ The `vercel.json` configuration file handles build settings and SPA routing auto
 
 ---
 
-## 📊 Performance Considerations
+## Performance Considerations
 
-- **Message Limit**: Each chat stores maximum 40 messages (auto-trimmed)
+- **Message Limit**: Each chat stores maximum 40 messages (auto trimmed)
 - **Lazy Loading**: Messages loaded per chat on selection
 - **Optimized Rendering**: React memoization for chat list items
-- **Efficient Scrolling**: Smooth scroll behavior with ref-based scrolling
+- **Efficient Scrolling**: Smooth scroll behavior with ref based scrolling
 
 ---
 
-## 🧪 Development Notes
+## Development Notes
 
 ### Key Design Decisions
 
 1. **Single Page Focus**: Simplified to single `/slack` route for focused demo
-2. **In-Memory Storage**: Messages stored in component state (no backend)
-3. **Simulated Streaming**: Auto-generated messages simulate real-time updates
+2. **In Memory Storage**: Messages stored in component state (no backend)
+3. **Simulated Streaming**: Auto generated messages simulate real time updates
 4. **Contextual Content**: Messages tailored to chat context for realistic demo
 
 ### Code Organization
@@ -355,13 +355,13 @@ The `vercel.json` configuration file handles build settings and SPA routing auto
 
 ---
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License.
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **Slack** for design inspiration and UI patterns
 - **React** and **TypeScript** communities for excellent tooling
@@ -369,7 +369,7 @@ This project is licensed under the MIT License.
 
 ---
 
-## 📞 Support
+## Support
 
 For questions, issues, or contributions:
 - **GitHub Issues**: Create an issue on the repository
