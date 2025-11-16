@@ -1,0 +1,131 @@
+[
+  {
+    "name": "James McGill",
+    "avatar": "/assets/faces/james-mcgill.jpg",
+    "initials": "JM",
+    "gender": "male",
+    "country": "United States",
+    "role": "Head of Engineering",
+    "me": true
+  },
+  {
+    "name": "Alice Carlysle",
+    "avatar": "/assets/faces/alice-carlysle.jpg",
+    "initials": "AC",
+    "gender": "female",
+    "country": "United States",
+    "role": "Software Engineer"
+  },
+  {
+    "name": "Bob Jenkins",
+    "avatar": "/assets/faces/bob-jenkins.jpg",
+    "initials": "BJ",
+    "gender": "male",
+    "country": "United States",
+    "role": "DevOps Engineer"
+  },
+  {
+    "name": "Carol Diaz",
+    "avatar": "/assets/faces/carol-diaz.jpg",
+    "initials": "CD",
+    "gender": "female",
+    "country": "United States",
+    "role": "SRE"
+  },
+  {
+    "name": "David Chen",
+    "avatar": "/assets/faces/david-chen.jpg",
+    "initials": "DC",
+    "gender": "male",
+    "country": "United States",
+    "role": "Software Engineer"
+  },
+  {
+    "name": "Eve Park",
+    "avatar": "/assets/faces/eve-park.jpg",
+    "initials": "EP",
+    "gender": "female",
+    "country": "United States",
+    "role": "Product Manager"
+  },
+  {
+    "name": "James Bryant",
+    "avatar": "/assets/faces/james-bryant.jpg",
+    "initials": "JB",
+    "gender": "male",
+    "country": "United Kingdom",
+    "role": "Engineering Manager"
+  },
+  {
+    "name": "Priya Shah",
+    "avatar": "/assets/faces/priya-shah.jpg",
+    "initials": "PS",
+    "gender": "female",
+    "country": "India",
+    "role": "SRE"
+  },
+  {
+    "name": "Sarah Kim",
+    "avatar": "/assets/faces/sarah-kim.jpg",
+    "initials": "SK",
+    "gender": "female",
+    "country": "United States",
+    "role": "Software Engineer"
+  },
+  {
+    "name": "Mike Rodriguez",
+    "avatar": "/assets/faces/mike-rodriguez.jpg",
+    "initials": "MR",
+    "gender": "male",
+    "country": "United States",
+    "role": "DevOps Engineer"
+  },
+  {
+    "name": "Emma Wilson",
+    "avatar": "/assets/faces/emma-wilson.jpg",
+    "initials": "EW",
+    "gender": "female",
+    "country": "United Kingdom",
+    "role": "Product Manager"
+  },
+  {
+    "name": "Alex Thompson",
+    "avatar": "/assets/faces/alex-thompson.jpg",
+    "initials": "AT",
+    "gender": "male",
+    "country": "United States",
+    "role": "Software Engineer"
+  },
+  {
+    "name": "Lisa Anderson",
+    "avatar": "/assets/faces/lisa-anderson.jpg",
+    "initials": "LA",
+    "gender": "female",
+    "country": "United States",
+    "role": "Engineering Manager"
+  },
+  {
+    "name": "Chris Martinez",
+    "avatar": "/assets/faces/chris-martinez.jpg",
+    "initials": "CM",
+    "gender": "male",
+    "country": "United States",
+    "role": "DevOps Engineer"
+  },
+  {
+    "name": "Jordan Lee",
+    "avatar": "/assets/faces/jordan-lee.jpg",
+    "initials": "JL",
+    "gender": "male",
+    "country": "United States",
+    "role": "Software Engineer"
+  },
+  {
+    "name": "Rovo",
+    "avatar": "/assets/rovo-icon.svg",
+    "initials": "RO",
+    "gender": "neutral",
+    "country": "Global",
+    "role": "AI Assistant"
+  }
+]

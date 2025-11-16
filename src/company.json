@@ -1,0 +1,60 @@
+{
+  "name": "Atlassian",
+  "logo": "/assets/atlassian-blue.png",
+  "description": "IT Operations and Service Management platform specializing in incident management, change management, infrastructure monitoring, and IT service delivery. We manage critical production systems, handle incident response, coordinate change requests, monitor system health, and ensure service reliability for enterprise customers.",
+  "industry": "Software Development",
+  "companySize": "Large Enterprise",
+  "channels": {
+    "types": [
+      {
+        "type": "engineering",
+        "description": "Technical discussions, code reviews, architecture decisions",
+        "examples": [
+          "#engineering",
+          "#backend",
+          "#frontend"
+        ]
+      },
+      {
+        "type": "operations",
+        "description": "Incident management, on-call rotations, infrastructure updates",
+        "examples": [
+          "#itom-4412",
+          "#incidents",
+          "#alerts"
+        ]
+      },
+      {
+        "type": "cross-functional",
+        "description": "Company-wide announcements, team updates, cross-team collaboration",
+        "examples": [
+          "#general"
+        ]
+      }
+    ],
+    "namingConventions": {
+      "engineering": "Lowercase with hyphens",
+      "product": "Lowercase with hyphens",
+      "operations": "Lowercase with hyphens",
+      "general": "Lowercase with hyphens or numbers"
+    }
+  },
+  "roles": [],
+  "topics": [
+    "incidents",
+    "alerts",
+    "deployments",
+    "monitoring"
+  ],
+  "communicationStyle": {
+    "tone": "Professional yet collaborative",
+    "formality": "Moderately formal",
+    "commonPatterns": [
+      "Incident updates",
+      "Status reports",
+      "Technical discussions",
+      "Post-mortems"
+    ]
+  },
+  "fileTemplates": []
+}

@@ -1,0 +1,296 @@
+{
+  "company": {
+    "name": "Bottleneck",
+    "logo": "/assets/atlassian-blue.png",
+    "description": "online social media app company",
+    "industry": "social media and teenagers",
+    "companySize": "350 people",
+    "domain": "bottleneck.com"
+  },
+  "employees": [
+    {
+      "name": "Michael Truell",
+      "avatar": "/assets/faces/michael-truell.jpg",
+      "gender": "male",
+      "country": "united states",
+      "role": "head of engineering",
+      "me": true
+    },
+    {
+      "avatar": "/assets/faces/david-smith.jpg",
+      "gender": "male",
+      "country": "us",
+      "role": "Software Engineer",
+      "name": "David Smith",
+      "verbose": true
+    },
+    {
+      "avatar": "/assets/faces/richard-martinez.jpg",
+      "gender": "male",
+      "country": "us",
+      "role": "Product Manager",
+      "name": "Richard Martinez",
+      "emoji-heavy": true
+    },
+    {
+      "avatar": "/assets/faces/amit-desai.jpg",
+      "gender": "male",
+      "country": "india",
+      "role": "DevOps Engineer",
+      "name": "Amit Desai",
+      "emoji-heavy": true
+    },
+    {
+      "avatar": "/assets/faces/karan-agarwal.jpg",
+      "gender": "female",
+      "country": "india",
+      "role": "SRE",
+      "name": "Karan Agarwal",
+      "emoji-heavy": true
+    },
+    {
+      "avatar": "/assets/faces/lisa-hernandez.jpg",
+      "gender": "female",
+      "country": "uk",
+      "role": "Backend Engineer",
+      "name": "Lisa Hernandez",
+      "verbose": true
+    },
+    {
+      "avatar": "/assets/faces/amanda-jackson.jpg",
+      "gender": "female",
+      "country": "uk",
+      "role": "Frontend Engineer",
+      "name": "Amanda Jackson",
+      "emoji-heavy": true
+    },
+    {
+      "avatar": "/assets/faces/mia-zimmermann.jpg",
+      "gender": "female",
+      "country": "germany",
+      "role": "Engineering Manager",
+      "name": "Mia Zimmermann"
+    },
+    {
+      "avatar": "/assets/faces/alexander-schneider.jpg",
+      "gender": "male",
+      "country": "germany",
+      "role": "Designer",
+      "name": "Alexander Schneider",
+      "emoji-heavy": true,
+      "verbose": true
+    },
+    {
+      "avatar": "/assets/faces/william-wilson.jpg",
+      "gender": "male",
+      "country": "australia",
+      "role": "Software Engineer",
+      "name": "William Wilson"
+    },
+    {
+      "avatar": "/assets/faces/henry-martin.jpg",
+      "gender": "male",
+      "country": "australia",
+      "role": "Product Manager",
+      "name": "Henry Martin"
+    },
+    {
+      "name": "Luna",
+      "avatar": "/assets/rovo-icon.svg",
+      "gender": "neutral",
+      "country": "Global",
+      "role": "AI Assistant"
+    }
+  ],
+  "channels": {
+    "starred": [
+      {
+        "id": "content-updates",
+        "name": "#content-updates",
+        "isPrivate": false,
+        "description": "Content platform updates and discussions",
+        "topics": [
+          "content moderation",
+          "feature releases",
+          "user engagement",
+          "platform updates"
+        ]
+      }
+    ],
+    "public": [
+      {
+        "id": "general",
+        "name": "#general",
+        "description": "Company-wide announcements and discussions",
+        "topics": [
+          "announcements",
+          "company updates",
+          "all-hands",
+          "team news"
+        ]
+      },
+      {
+        "id": "engineering",
+        "name": "#engineering",
+        "description": "Engineering discussions",
+        "topics": [
+          "code reviews",
+          "architecture",
+          "technical discussions",
+          "PRs"
+        ]
+      },
+      {
+        "id": "operations",
+        "name": "#operations",
+        "description": "Operations and infrastructure",
+        "topics": [
+          "deployments",
+          "infrastructure",
+          "monitoring"
+        ]
+      }
+    ],
+    "private": []
+  },
+  "communicationStyle": {
+    "tone": "Professional yet collaborative",
+    "formality": "Casual to semi-formal depending on context",
+    "commonPatterns": [
+      "Quick status updates and check-ins",
+      "Technical deep-dives and architecture discussions",
+      "Incident coordination and resolution",
+      "Feature announcements and product updates",
+      "Team celebrations and recognition"
+    ]
+  },
+  "messageThemes": {
+    "content-updates": [
+      "Message about general discussion",
+      "Discussion on team updates",
+      "Update regarding collaboration"
+    ],
+    "general": [
+      "Message about announcements",
+      "Discussion on company updates",
+      "Update regarding all-hands"
+    ],
+    "engineering": [
+      "Message about code reviews",
+      "Discussion on architecture",
+      "Update regarding technical discussions"
+    ],
+    "operations": [
+      "Message about general discussion",
+      "Discussion on team updates",
+      "Update regarding collaboration"
+    ]
+  },
+  "roles": [
+    {
+      "title": "Software Engineer",
+      "responsibilities": [
+        "Write and review code",
+        "Design system architecture",
+        "Participate in technical discussions"
+      ],
+      "commonChannels": [
+        "#engineering",
+        "#backend",
+        "#code-review"
+      ]
+    },
+    {
+      "title": "Product Manager",
+      "responsibilities": [
+        "Define product roadmap",
+        "Gather user requirements",
+        "Coordinate cross-functional teams"
+      ],
+      "commonChannels": [
+        "#product",
+        "#roadmap",
+        "#feature-requests"
+      ]
+    },
+    {
+      "title": "Site Reliability Engineer (SRE)",
+      "responsibilities": [
+        "Monitor system health",
+        "Respond to incidents",
+        "Improve system reliability"
+      ],
+      "commonChannels": [
+        "#incidents",
+        "#oncall",
+        "#monitoring",
+        "#infrastructure"
+      ]
+    },
+    {
+      "title": "DevOps Engineer",
+      "responsibilities": [
+        "Manage CI/CD pipelines",
+        "Automate deployments",
+        "Maintain infrastructure"
+      ],
+      "commonChannels": [
+        "#dev-ops",
+        "#infrastructure",
+        "#deployments"
+      ]
+    }
+  ],
+  "fileTemplates": [
+    {
+      "type": "pdf",
+      "name": "Company Handbook.pdf",
+      "size": "2.4 MB"
+    },
+    {
+      "type": "document",
+      "name": "Project Plan.docx",
+      "size": "856 KB"
+    },
+    {
+      "type": "spreadsheet",
+      "name": "Budget Planning.xlsx",
+      "size": "1.2 MB"
+    }
+  ],
+  "groupDMs": [
+    {
+      "id": "group-1",
+      "name": "David, Mia, Henry, Amit, William",
+      "members": [
+        "David Smith",
+        "Mia Zimmermann",
+        "Henry Martin",
+        "Amit Desai",
+        "William Wilson"
+      ]
+    },
+    {
+      "id": "group-2",
+      "name": "Amit, Karan, Alexander, Mia, William",
+      "members": [
+        "Amit Desai",
+        "Karan Agarwal",
+        "Alexander Schneider",
+        "Mia Zimmermann",
+        "William Wilson"
+      ]
+    },
+    {
+      "id": "group-3",
+      "name": "William, Lisa, Mia, Henry, Alexander",
+      "members": [
+        "William Wilson",
+        "Lisa Hernandez",
+        "Mia Zimmermann",
+        "Henry Martin",
+        "Alexander Schneider"
+      ]
+    }
+  ]
+}

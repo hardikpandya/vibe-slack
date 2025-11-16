@@ -1,0 +1,245 @@
+{
+  "starred": [
+    {
+      "id": "itom-4412",
+      "name": "#itom-4412",
+      "isPrivate": false,
+      "description": "IT Operations incident channel",
+      "topics": [
+        "incidents",
+        "alerts",
+        "monitoring",
+        "resolutions"
+      ]
+    }
+  ],
+  "public": [
+    {
+      "id": "general",
+      "name": "#general",
+      "description": "Company-wide announcements and discussions",
+      "topics": [
+        "announcements",
+        "company updates",
+        "all-hands",
+        "team news"
+      ]
+    },
+    {
+      "id": "incidents",
+      "name": "#incidents",
+      "description": "Incident management and coordination",
+      "topics": [
+        "incidents",
+        "on-call",
+        "escalations",
+        "post-mortems"
+      ]
+    },
+    {
+      "id": "alerts",
+      "name": "#alerts",
+      "description": "System alerts and monitoring",
+      "topics": [
+        "alerts",
+        "monitoring",
+        "thresholds",
+        "notifications"
+      ]
+    },
+    {
+      "id": "itom-alerts",
+      "name": "#itom-alerts",
+      "description": "ITOM alert notifications and escalations",
+      "topics": [
+        "itom alerts",
+        "notifications",
+        "escalations",
+        "monitoring"
+      ]
+    },
+    {
+      "id": "itsm-incidents",
+      "name": "#itsm-incidents",
+      "description": "ITSM incident tracking and resolution",
+      "topics": [
+        "incidents",
+        "tickets",
+        "resolution",
+        "escalation"
+      ]
+    },
+    {
+      "id": "chg-review",
+      "name": "#chg-review",
+      "description": "Change review and approval",
+      "topics": [
+        "changes",
+        "reviews",
+        "approvals",
+        "deployments"
+      ]
+    },
+    {
+      "id": "CHG-189",
+      "name": "#CHG-189",
+      "description": "Change request review - Database index optimization",
+      "topics": [
+        "change review",
+        "risk assessment",
+        "approval",
+        "deployment"
+      ]
+    },
+    {
+      "id": "dev-ops",
+      "name": "#dev-ops",
+      "description": "DevOps and infrastructure",
+      "topics": [
+        "deployments",
+        "infrastructure",
+        "CI/CD",
+        "scaling"
+      ]
+    },
+    {
+      "id": "on-call",
+      "name": "#on-call",
+      "description": "On-call rotations and escalations",
+      "topics": [
+        "on-call",
+        "rotations",
+        "escalations",
+        "coverage"
+      ]
+    },
+    {
+      "id": "monitoring",
+      "name": "#monitoring",
+      "description": "System monitoring and observability",
+      "topics": [
+        "monitoring",
+        "metrics",
+        "dashboards",
+        "alerts"
+      ]
+    },
+    {
+      "id": "sre",
+      "name": "#sre",
+      "description": "Site Reliability Engineering discussions",
+      "topics": [
+        "reliability",
+        "slo",
+        "error budgets",
+        "post-mortems"
+      ]
+    },
+    {
+      "id": "infrastructure",
+      "name": "#infrastructure",
+      "description": "Infrastructure management and updates",
+      "topics": [
+        "infrastructure",
+        "servers",
+        "networking",
+        "updates"
+      ]
+    }
+  ],
+  "private": [
+    {
+      "id": "itom-critical",
+      "name": "#itom-critical",
+      "isPrivate": true,
+      "description": "Critical ITOM incidents and escalations",
+      "topics": [
+        "critical incidents",
+        "p1",
+        "escalations",
+        "executive updates"
+      ]
+    },
+    {
+      "id": "itsm-security",
+      "name": "#itsm-security",
+      "isPrivate": true,
+      "description": "Security-related ITSM incidents",
+      "topics": [
+        "security",
+        "vulnerabilities",
+        "incidents",
+        "compliance"
+      ]
+    },
+    {
+      "id": "change-approval",
+      "name": "#change-approval",
+      "isPrivate": true,
+      "description": "Change approval board discussions",
+      "topics": [
+        "change approval",
+        "risk assessment",
+        "governance",
+        "compliance"
+      ]
+    },
+    {
+      "id": "leadership-ops",
+      "name": "#leadership-ops",
+      "isPrivate": true,
+      "description": "Operations leadership discussions",
+      "topics": [
+        "strategy",
+        "planning",
+        "budget",
+        "priorities"
+      ]
+    },
+    {
+      "id": "post-mortems",
+      "name": "#post-mortems",
+      "isPrivate": true,
+      "description": "Post-incident review discussions",
+      "topics": [
+        "post-mortems",
+        "root cause",
+        "action items",
+        "lessons learned"
+      ]
+    }
+  ],
+  "messageThemes": {},
+  "groupDMs": [
+    {
+      "id": "group-1",
+      "name": "David Chen, Carol Diaz, Bob Jenkins, Mike Rodriguez",
+      "members": [
+        "David Chen",
+        "Carol Diaz",
+        "Bob Jenkins",
+        "Mike Rodriguez"
+      ]
+    },
+    {
+      "id": "group-2",
+      "name": "Alice Carlysle, Sarah Kim, Alex Thompson, James Bryant",
+      "members": [
+        "Alice Carlysle",
+        "Sarah Kim",
+        "Alex Thompson",
+        "James Bryant"
+      ]
+    },
+    {
+      "id": "group-3",
+      "name": "Eve Park, Emma Wilson, Lisa Anderson, Priya Shah",
+      "members": [
+        "Eve Park",
+        "Emma Wilson",
+        "Lisa Anderson",
+        "Priya Shah"
+      ]
+    }
+  ]
+}

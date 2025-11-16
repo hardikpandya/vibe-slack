@@ -1,0 +1,304 @@
+:root {
+  /* Typography */
+  --fs-xs: 11px; /* subtle labels, lozenges */
+  --fs-sm: 12px; /* captions */
+  --fs-base: 14px; /* body */
+  --fs-lg: 16px; /* section titles */
+  --fs-xl: 20px; /* page titles */
+  --fs-2xl: 24px; /* large headers */
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* Atlassian-like colors (light) */
+  --bg: #ffffff;
+  --text: #202124; /* unified neutral for primary text */
+  --muted: #6B778C; /* neutral 500-600 */
+  --border: #DFE1E6; /* neutral 300 */
+  --surface: #FFFFFF;
+  --surface-weak: #F7F8F9; /* neutral 100 */
+  /* Unified neutrals */
+  --text-900: #202124; /* main text */
+  --text-700: #5f6368; /* secondary text/icons */
+  --text-600: #6B778C; /* tertiary */
+  --text-500: #9CA3AF; /* disabled/subtle */
+  /* Atlassian blue */
+  /* Unified blue tone */
+  --primary: #2563eb; /* consistent blue */
+  --primary-weak: rgba(37, 99, 235, 0.12);
+  --primary-border: rgba(37, 99, 235, 0.35);
+  --primary-dark: #1e40af;
+
+  /* Shape */
+  --radius: 4px;
+
+  font-family: 'Atlassian Sans', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: var(--fw-normal);
+
+  color-scheme: light;
+  color: var(--text);
+  background-color: var(--bg);
+
+  font-synthesis: weight;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Atlassian Sans font */
+@font-face {
+  font-family: 'Atlassian Sans';
+  src: url('/assets/fonts/AtlassianSans.v2.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Atlassian Sans';
+  src: url('/assets/fonts/AtlassianSans.v2.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Atlassian Mono for timers/codes */
+@font-face {
+  font-family: 'Atlassian Mono';
+  src: url('/assets/fonts/AtlassianMono.v1.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Lato font family for Slack interface */
+@font-face {
+  font-family: 'Lato';
+  src: url('/assets/fonts/Lato-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: 'Lato';
+  src: url('/assets/fonts/Lato-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: 'Lato';
+  src: url('/assets/fonts/Lato-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: 'Lato';
+  src: url('/assets/fonts/Lato-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: 'Lato';
+  src: url('/assets/fonts/Lato-BoldItalic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: block;
+}
+@font-face {
+  font-family: 'Lato';
+  src: url('/assets/fonts/Lato-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: 'Lato';
+  src: url('/assets/fonts/Lato-BlackItalic.ttf') format('truetype');
+  font-weight: 900;
+  font-style: italic;
+  font-display: block;
+}
+
+a {
+  font-weight: 500;
+  color: var(--primary);
+  text-decoration: inherit;
+  cursor: pointer;
+}
+a:hover {
+  color: var(--primary);
+  text-decoration: underline !important;
+  cursor: pointer;
+}
+/* Ensure links in messages always show pointer cursor and underline on hover */
+a[href]:not(.no-underline-link):hover {
+  cursor: pointer;
+  text-decoration: underline !important;
+}
+
+/* Message content links - ensure pointer cursor and underline on hover */
+.message-content a {
+  cursor: pointer;
+}
+.message-content a:hover {
+  cursor: pointer;
+  text-decoration: underline !important;
+}
+
+/* @-tags (mentions) should behave like links */
+.message-content span[style*="#1D9BD1"],
+.message-content span[style*="color: #1D9BD1"],
+.message-content span[style*="color:#1D9BD1"] {
+  cursor: pointer;
+  text-decoration: none;
+}
+.message-content span[style*="#1D9BD1"]:hover,
+.message-content span[style*="color: #1D9BD1"]:hover,
+.message-content span[style*="color:#1D9BD1"]:hover {
+  cursor: pointer;
+  text-decoration: underline !important;
+}
+
+/* Utility: prevent underline on specific links (e.g., buttons-as-links) */
+a.no-underline-link,
+a.no-underline-link:hover,
+a.no-underline-link:focus {
+  text-decoration: none !important;
+}
+
+/* Do not underline left navigation items on hover */
+aside nav a:hover {
+  text-decoration: none !important;
+}
+
+body {
+  margin: 0;
+  display: block;
+  min-width: 320px;
+  min-height: 100vh;
+  color: var(--text);
+  background: #000000; /* Default dark background, will be updated by theme */
+  font-size: var(--fs-base);
+}
+
+html {
+  background: #000000; /* Default dark background, will be updated by theme */
+}
+
+/* Hide scrollbars in main app for a cleaner look */
+html, body, #root {
+  scrollbar-width: none; /* Firefox */
+}
+html::-webkit-scrollbar, body::-webkit-scrollbar, #root::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+/* Hide scrollbars for no-scrollbars class */
+.no-scrollbars {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+.no-scrollbars::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+h1 { font-size: var(--fs-2xl); line-height: 1.25; font-weight: var(--fw-bold); margin: 0; }
+h2 { font-size: var(--fs-xl); line-height: 1.3; font-weight: var(--fw-bold); margin: 0; }
+h3 { font-size: var(--fs-lg); line-height: 1.35; font-weight: var(--fw-semibold); margin: 0; }
+h4 { font-size: var(--fs-base); line-height: 1.4; font-weight: var(--fw-bold); margin: 0; }
+h5 { font-size: var(--fs-sm); line-height: 1.4; font-weight: var(--fw-bold); margin: 0; }
+.caption { font-size: var(--fs-xs); color: var(--muted); }
+
+button,
+.btn,
+.dropdown > button,
+nav button {
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: var(--fw-medium);
+  font-family: inherit;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+/* Button hover system */
+button[data-variant="neutral"]:hover { background: #F1F2F4 !important; border-color: #DFE1E6 !important; }
+button[data-variant="primary"]:hover { background: var(--primary-dark) !important; border-color: var(--primary-dark) !important; }
+
+input, select, textarea {
+  border-radius: var(--radius);
+}
+button:hover {
+  border-color: #646cff;
+}
+/* Remove default browser focus outlines - we use custom highlights */
+button:focus,
+button:focus-visible,
+button:active {
+  outline: none !important;
+}
+
+/* Prevent text selection and tap highlights on buttons */
+button {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* Also remove outlines from other interactive elements */
+a:focus,
+a:focus-visible,
+input:focus,
+input:focus-visible,
+select:focus,
+select:focus-visible,
+textarea:focus,
+textarea:focus-visible {
+  outline: none !important;
+}
+
+/* Force light theme; remove dark-mode overrides */
+
+/* Global keyframes for inline loaders */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes rotate360 {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes grow {
+  to { transform: scale(1); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes tick {
+  to { border-color: #22c55e; }
+}
+
+/* Hide React Flow attribution watermark */
+.react-flow__attribution { display: none !important; }
+
+/* Pulsating border color for culprit/affected nodes */
+@keyframes pulse-border-red {
+  0%, 100% { border-color: #ef4444; }
+  50% { border-color: #fca5a5; }
+}
+@keyframes pulse-border-yellow {
+  0%, 100% { border-color: #f59e0b; }
+  50% { border-color: #fde68a; }
+}

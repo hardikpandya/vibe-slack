@@ -1,0 +1,122 @@
+{
+  "company": {
+    "name": "Your Company Name",
+    "logo": "/assets/your-logo.png",
+    "description": "A brief description of your company and what it does. This will appear in company.json and influence how the app feels.",
+    "industry": "Your Industry (e.g., Software Development, Finance, Healthcare)",
+    "companySize": "Small/Medium/Large Enterprise",
+    "domain": "yourcompany.com"
+  },
+  "employees": [
+    {
+      "name": "Your Name",
+      "avatar": "/assets/faces/your-photo.jpg",
+      "gender": "male",
+      "country": "United States",
+      "role": "Software Engineer",
+      "me": true,
+      "emoji-heavy": false,
+      "verbose": false
+    },
+    {
+      "name": "Team Member 1",
+      "avatar": "/assets/faces/member1.jpg",
+      "gender": "female",
+      "country": "United States",
+      "role": "Product Manager",
+      "emoji-heavy": true,
+      "verbose": false
+    },
+    {
+      "name": "Team Member 2",
+      "avatar": "/assets/faces/member2.jpg",
+      "gender": "male",
+      "country": "India",
+      "role": "DevOps Engineer",
+      "emoji-heavy": false,
+      "verbose": true
+    },
+    {
+      "name": "Team Member 3",
+      "avatar": "/assets/faces/member3.jpg",
+      "gender": "female",
+      "country": "Australia",
+      "role": "SRE",
+      "emoji-heavy": false,
+      "verbose": false
+    }
+  ],
+  "channels": {
+    "starred": [
+      {
+        "id": "incident-123",
+        "name": "#incident-123",
+        "isPrivate": false,
+        "description": "Active incident channel",
+        "topics": ["incident response", "root cause analysis", "mitigation", "alerts"]
+      },
+      {
+        "id": "alerts",
+        "name": "#alerts",
+        "isPrivate": false,
+        "description": "System alerts and monitoring",
+        "topics": ["alerts", "monitoring", "anomalies"]
+      }
+    ],
+    "public": [
+      {
+        "id": "general",
+        "name": "#general",
+        "description": "Company-wide announcements",
+        "topics": ["announcements", "company updates", "all-hands", "team news"]
+      },
+      {
+        "id": "engineering",
+        "name": "#engineering",
+        "description": "Engineering discussions",
+        "topics": ["code reviews", "architecture", "technical discussions", "PRs"]
+      }
+    ],
+    "private": []
+  },
+  "communicationStyle": {
+    "tone": "Professional yet collaborative",
+    "formality": "Casual to semi-formal depending on context",
+    "commonPatterns": [
+      "Quick status updates and check-ins",
+      "Technical deep-dives and architecture discussions",
+      "Incident coordination and resolution",
+      "Feature announcements and product updates",
+      "Team celebrations and recognition"
+    ]
+  },
+  "messageThemes": {
+    "incident-123": [
+      "Incident detected: API latency spike in us-east-1",
+      "Checking CloudWatch metrics and application logs",
+      "Root cause identified: database connection pool exhaustion",
+      "Mitigation in progress: increasing connection pool size",
+      "Incident resolved: metrics back to normal"
+    ],
+    "alerts": [
+      "Alert: Payment API p95 latency exceeded threshold",
+      "Acknowledged. Investigating root cause",
+      "Found connection pool saturation",
+      "Scaling infrastructure. ETA 5 minutes",
+      "Alert cleared: latency back to normal"
+    ]
+  },
+  "roles": [
+    {
+      "title": "Software Engineer",
+      "responsibilities": ["Write and review code", "Design system architecture", "Participate in technical discussions"],
+      "commonChannels": ["#engineering", "#backend", "#code-review"]
+    }
+  ],
+  "fileTemplates": [
+    { "type": "pdf", "name": "API Architecture Documentation.pdf", "size": "2.4 MB" },
+    { "type": "document", "name": "Database Schema Design.docx", "size": "856 KB" },
+    { "type": "code", "name": "deployment-script.sh", "size": "12 KB" }
+  ]
+}
+
