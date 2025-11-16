@@ -1,7 +1,7 @@
 [
   {
     "name": "James McGill",
-    "avatar": "/assets/faces/james-mcgill.jpg",
+    "avatar": "/assets/faces/alex-johnson.png",
     "initials": "JM",
     "gender": "male",
     "country": "United States",
@@ -9,40 +9,40 @@
     "me": true
   },
   {
-    "name": "Alice Carlysle",
+    "name": "Hannah Wolf",
     "avatar": "/assets/faces/alice-carlysle.jpg",
-    "initials": "AC",
+    "initials": "HW",
     "gender": "female",
-    "country": "United States",
-    "role": "Software Engineer"
+    "country": "Germany",
+    "role": "Production Engineer"
   },
   {
-    "name": "Bob Jenkins",
-    "avatar": "/assets/faces/bob-jenkins.jpg",
-    "initials": "BJ",
+    "name": "Felix Schäfer",
+    "avatar": "/assets/faces/alex-thompson.jpg",
+    "initials": "FS",
     "gender": "male",
-    "country": "United States",
-    "role": "DevOps Engineer"
+    "country": "Germany",
+    "role": "Manufacturing Operations"
   },
   {
-    "name": "Carol Diaz",
-    "avatar": "/assets/faces/carol-diaz.jpg",
-    "initials": "CD",
+    "name": "Mia Zimmermann",
+    "avatar": "/assets/faces/amanda-jackson.png",
+    "initials": "MZ",
     "gender": "female",
-    "country": "United States",
-    "role": "SRE"
+    "country": "Germany",
+    "role": "Quality Control Manager"
   },
   {
-    "name": "David Chen",
-    "avatar": "/assets/faces/david-chen.jpg",
-    "initials": "DC",
+    "name": "Alexander Schneider",
+    "avatar": "/assets/faces/alexander-schneider.png",
+    "initials": "AS",
     "gender": "male",
-    "country": "United States",
-    "role": "Software Engineer"
+    "country": "Germany",
+    "role": "Vehicle Engineering"
   },
   {
     "name": "Eve Park",
-    "avatar": "/assets/faces/eve-park.jpg",
+    "avatar": "/assets/faces/amanda-lee.png",
     "initials": "EP",
     "gender": "female",
     "country": "United States",
@@ -50,7 +50,7 @@
   },
   {
     "name": "James Bryant",
-    "avatar": "/assets/faces/james-bryant.jpg",
+    "avatar": "/assets/faces/amit-desai.png",
     "initials": "JB",
     "gender": "male",
     "country": "United Kingdom",
@@ -58,7 +58,7 @@
   },
   {
     "name": "Priya Shah",
-    "avatar": "/assets/faces/priya-shah.jpg",
+    "avatar": "/assets/faces/ananya-iyer.png",
     "initials": "PS",
     "gender": "female",
     "country": "India",
@@ -66,23 +66,23 @@
   },
   {
     "name": "Sarah Kim",
-    "avatar": "/assets/faces/sarah-kim.jpg",
+    "avatar": "/assets/faces/ashley-brown.png",
     "initials": "SK",
     "gender": "female",
     "country": "United States",
     "role": "Software Engineer"
   },
   {
-    "name": "Mike Rodriguez",
-    "avatar": "/assets/faces/mike-rodriguez.jpg",
-    "initials": "MR",
+    "name": "Paul Bauer",
+    "avatar": "/assets/faces/arjun-agarwal.png",
+    "initials": "PB",
     "gender": "male",
-    "country": "United States",
-    "role": "DevOps Engineer"
+    "country": "Germany",
+    "role": "Supply Chain Manager"
   },
   {
     "name": "Emma Wilson",
-    "avatar": "/assets/faces/emma-wilson.jpg",
+    "avatar": "/assets/faces/ashley-jackson.png",
     "initials": "EW",
     "gender": "female",
     "country": "United Kingdom",
@@ -90,7 +90,7 @@
   },
   {
     "name": "Alex Thompson",
-    "avatar": "/assets/faces/alex-thompson.jpg",
+    "avatar": "/assets/faces/avery-taylor.png",
     "initials": "AT",
     "gender": "male",
     "country": "United States",
@@ -98,7 +98,7 @@
   },
   {
     "name": "Lisa Anderson",
-    "avatar": "/assets/faces/lisa-anderson.jpg",
+    "avatar": "/assets/faces/ashley-lee.png",
     "initials": "LA",
     "gender": "female",
     "country": "United States",
@@ -106,7 +106,7 @@
   },
   {
     "name": "Chris Martinez",
-    "avatar": "/assets/faces/chris-martinez.jpg",
+    "avatar": "/assets/faces/bob-jenkins.jpg",
     "initials": "CM",
     "gender": "male",
     "country": "United States",
@@ -114,18 +114,26 @@
   },
   {
     "name": "Jordan Lee",
-    "avatar": "/assets/faces/jordan-lee.jpg",
+    "avatar": "/assets/faces/chris-martinez.jpg",
     "initials": "JL",
     "gender": "male",
     "country": "United States",
     "role": "Software Engineer"
   },
   {
-    "name": "Rovo",
-    "avatar": "/assets/rovo-icon.svg",
-    "initials": "RO",
+    "name": "Merc AI",
+    "avatar": "/assets/merc-ai.png",
+    "initials": "MA",
     "gender": "neutral",
     "country": "Global",
     "role": "AI Assistant"
+  },
+  {
+    "name": "Workday",
+    "avatar": "/assets/workday.png",
+    "initials": "WD",
+    "gender": "neutral",
+    "country": "Global",
+    "role": "HR System"
   }
 ]

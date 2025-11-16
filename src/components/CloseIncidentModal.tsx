@@ -114,8 +114,8 @@ export default function CloseIncidentModal({ isOpen, onClose, onConfirm }: Close
 
         <div style={styles.footer}>
           <div style={styles.rovoLine} aria-live="polite" aria-atomic="true">
-            <img src="/assets/rovo-icon.svg" alt="" width={18} height={18} style={styles.rovoIcon} />
-            <span style={styles.rovoLabel}>Rovo</span>
+            <img src="/assets/merc-ai.png" alt="" width={18} height={18} style={styles.rovoIcon} />
+            <span style={styles.rovoLabel}>Merc AI</span>
             <span style={styles.cyclerContainer}>
               {settled ? (
                 <span style={{ ...styles.cyclerText, fontWeight: 700 }}>has verified checks.</span>

@@ -1,27 +1,36 @@
 {
-  "name": "Atlassian",
-  "logo": "/assets/atlassian-blue.png",
-  "description": "IT Operations and Service Management platform specializing in incident management, change management, infrastructure monitoring, and IT service delivery. We manage critical production systems, handle incident response, coordinate change requests, monitor system health, and ensure service reliability for enterprise customers.",
-  "industry": "Software Development",
+  "name": "Mercedes-Benz",
+  "logo": "/assets/mercedes.png",
+  "description": "Global luxury automotive manufacturer operating production facilities worldwide. We design, engineer, and manufacture premium passenger vehicles, commercial vehicles, and electric vehicles across multiple continents. Our operations span manufacturing plants in Germany, USA, China, India, South Africa, and other global locations, managing complex supply chains, production lines, quality control systems, and vehicle delivery logistics.",
+  "industry": "Automotive Manufacturing",
   "companySize": "Large Enterprise",
   "channels": {
     "types": [
       {
-        "type": "engineering",
-        "description": "Technical discussions, code reviews, architecture decisions",
+        "type": "manufacturing",
+        "description": "Production line discussions, quality control, assembly operations",
         "examples": [
-          "#engineering",
-          "#backend",
-          "#frontend"
+          "#production-line-1",
+          "#quality-control",
+          "#assembly"
+        ]
+      },
+      {
+        "type": "engineering",
+        "description": "Vehicle design, engineering, R&D discussions",
+        "examples": [
+          "#vehicle-engineering",
+          "#r-d",
+          "#design"
         ]
       },
       {
         "type": "operations",
-        "description": "Incident management, on-call rotations, infrastructure updates",
+        "description": "Production incidents, supply chain issues, plant operations",
         "examples": [
-          "#itom-4412",
-          "#incidents",
-          "#alerts"
+          "#production-alerts",
+          "#supply-chain",
+          "#plant-operations"
         ]
       },
       {
@@ -33,27 +42,31 @@
       }
     ],
     "namingConventions": {
+      "manufacturing": "Lowercase with hyphens",
       "engineering": "Lowercase with hyphens",
-      "product": "Lowercase with hyphens",
       "operations": "Lowercase with hyphens",
       "general": "Lowercase with hyphens or numbers"
     }
   },
   "roles": [],
   "topics": [
-    "incidents",
-    "alerts",
-    "deployments",
-    "monitoring"
+    "production",
+    "quality control",
+    "supply chain",
+    "vehicle assembly",
+    "manufacturing",
+    "plant operations",
+    "global operations"
   ],
   "communicationStyle": {
     "tone": "Professional yet collaborative",
     "formality": "Moderately formal",
     "commonPatterns": [
-      "Incident updates",
-      "Status reports",
-      "Technical discussions",
-      "Post-mortems"
+      "Production updates",
+      "Quality reports",
+      "Supply chain coordination",
+      "Plant operations",
+      "Global manufacturing"
     ]
   },
   "fileTemplates": []

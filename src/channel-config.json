@@ -1,15 +1,16 @@
 {
   "starred": [
     {
-      "id": "itom-4412",
-      "name": "#itom-4412",
+      "id": "production-line-sindelfingen",
+      "name": "#production-line-sindelfingen",
       "isPrivate": false,
-      "description": "IT Operations incident channel",
+      "description": "Sindelfingen plant production line operations - E-Class and S-Class manufacturing",
       "topics": [
-        "incidents",
-        "alerts",
-        "monitoring",
-        "resolutions"
+        "production",
+        "assembly",
+        "quality control",
+        "line efficiency",
+        "vehicle manufacturing"
       ]
     }
   ],
@@ -22,190 +23,207 @@
         "announcements",
         "company updates",
         "all-hands",
-        "team news"
+        "team news",
+        "global operations"
       ]
     },
     {
-      "id": "incidents",
-      "name": "#incidents",
-      "description": "Incident management and coordination",
+      "id": "production-alerts",
+      "name": "#production-alerts",
+      "description": "Production line alerts and manufacturing incidents",
       "topics": [
-        "incidents",
-        "on-call",
-        "escalations",
-        "post-mortems"
+        "production issues",
+        "line stoppages",
+        "equipment failures",
+        "quality alerts",
+        "manufacturing incidents"
       ]
     },
     {
-      "id": "alerts",
-      "name": "#alerts",
-      "description": "System alerts and monitoring",
+      "id": "quality-control",
+      "name": "#quality-control",
+      "description": "Vehicle quality control and inspection",
       "topics": [
-        "alerts",
-        "monitoring",
-        "thresholds",
-        "notifications"
+        "quality checks",
+        "defect tracking",
+        "inspection reports",
+        "quality standards",
+        "vehicle testing"
       ]
     },
     {
-      "id": "itom-alerts",
-      "name": "#itom-alerts",
-      "description": "ITOM alert notifications and escalations",
+      "id": "supply-chain",
+      "name": "#supply-chain",
+      "description": "Global supply chain coordination and logistics",
       "topics": [
-        "itom alerts",
-        "notifications",
-        "escalations",
-        "monitoring"
+        "parts delivery",
+        "supplier coordination",
+        "inventory management",
+        "logistics",
+        "global supply chain"
       ]
     },
     {
-      "id": "itsm-incidents",
-      "name": "#itsm-incidents",
-      "description": "ITSM incident tracking and resolution",
+      "id": "plant-operations",
+      "name": "#plant-operations",
+      "description": "Plant operations and facility management",
       "topics": [
-        "incidents",
-        "tickets",
-        "resolution",
-        "escalation"
+        "plant operations",
+        "facility management",
+        "maintenance",
+        "safety",
+        "production planning"
       ]
     },
     {
-      "id": "chg-review",
-      "name": "#chg-review",
-      "description": "Change review and approval",
+      "id": "vehicle-assembly",
+      "name": "#vehicle-assembly",
+      "description": "Vehicle assembly line coordination",
       "topics": [
-        "changes",
-        "reviews",
-        "approvals",
-        "deployments"
+        "assembly operations",
+        "line balancing",
+        "workstation coordination",
+        "assembly quality",
+        "production targets"
       ]
     },
     {
-      "id": "CHG-189",
-      "name": "#CHG-189",
-      "description": "Change request review - Database index optimization",
+      "id": "PROD-2024-045",
+      "name": "#PROD-2024-045",
+      "description": "Production change request - EQS battery assembly optimization",
       "topics": [
-        "change review",
+        "production change",
+        "process improvement",
         "risk assessment",
         "approval",
-        "deployment"
+        "implementation"
       ]
     },
     {
-      "id": "dev-ops",
-      "name": "#dev-ops",
-      "description": "DevOps and infrastructure",
+      "id": "r-d",
+      "name": "#r-d",
+      "description": "Research and Development - vehicle design and engineering",
       "topics": [
-        "deployments",
-        "infrastructure",
-        "CI/CD",
-        "scaling"
+        "vehicle design",
+        "engineering",
+        "innovation",
+        "prototyping",
+        "testing"
       ]
     },
     {
-      "id": "on-call",
-      "name": "#on-call",
-      "description": "On-call rotations and escalations",
+      "id": "production-planning",
+      "name": "#production-planning",
+      "description": "Production planning and scheduling",
       "topics": [
-        "on-call",
-        "rotations",
-        "escalations",
-        "coverage"
+        "production schedules",
+        "capacity planning",
+        "demand forecasting",
+        "shift planning",
+        "resource allocation"
       ]
     },
     {
-      "id": "monitoring",
-      "name": "#monitoring",
-      "description": "System monitoring and observability",
+      "id": "global-manufacturing",
+      "name": "#global-manufacturing",
+      "description": "Global manufacturing coordination across all plants",
       "topics": [
-        "monitoring",
-        "metrics",
-        "dashboards",
-        "alerts"
+        "global operations",
+        "plant coordination",
+        "best practices",
+        "standardization",
+        "cross-plant collaboration"
       ]
     },
     {
-      "id": "sre",
-      "name": "#sre",
-      "description": "Site Reliability Engineering discussions",
+      "id": "electric-vehicles",
+      "name": "#electric-vehicles",
+      "description": "Electric vehicle production and EV-specific operations",
       "topics": [
-        "reliability",
-        "slo",
-        "error budgets",
-        "post-mortems"
+        "EV production",
+        "battery assembly",
+        "charging systems",
+        "electric drivetrain",
+        "sustainability"
       ]
     },
     {
-      "id": "infrastructure",
-      "name": "#infrastructure",
-      "description": "Infrastructure management and updates",
+      "id": "logistics-delivery",
+      "name": "#logistics-delivery",
+      "description": "Vehicle logistics and delivery coordination",
       "topics": [
-        "infrastructure",
-        "servers",
-        "networking",
-        "updates"
+        "vehicle delivery",
+        "shipping",
+        "transportation",
+        "distribution",
+        "customer delivery"
       ]
     }
   ],
   "private": [
     {
-      "id": "itom-critical",
-      "name": "#itom-critical",
+      "id": "production-critical",
+      "name": "#production-critical",
       "isPrivate": true,
-      "description": "Critical ITOM incidents and escalations",
+      "description": "Critical production incidents and escalations",
       "topics": [
         "critical incidents",
-        "p1",
+        "major line stoppages",
         "escalations",
-        "executive updates"
+        "executive updates",
+        "urgent issues"
       ]
     },
     {
-      "id": "itsm-security",
-      "name": "#itsm-security",
+      "id": "quality-security",
+      "name": "#quality-security",
       "isPrivate": true,
-      "description": "Security-related ITSM incidents",
+      "description": "Quality and safety-related incidents",
       "topics": [
-        "security",
-        "vulnerabilities",
-        "incidents",
-        "compliance"
+        "safety incidents",
+        "quality recalls",
+        "compliance",
+        "regulatory issues",
+        "risk management"
       ]
     },
     {
-      "id": "change-approval",
-      "name": "#change-approval",
+      "id": "production-approval",
+      "name": "#production-approval",
       "isPrivate": true,
-      "description": "Change approval board discussions",
+      "description": "Production change approval board discussions",
       "topics": [
         "change approval",
         "risk assessment",
         "governance",
-        "compliance"
+        "compliance",
+        "process changes"
       ]
     },
     {
-      "id": "leadership-ops",
-      "name": "#leadership-ops",
+      "id": "leadership-manufacturing",
+      "name": "#leadership-manufacturing",
       "isPrivate": true,
-      "description": "Operations leadership discussions",
+      "description": "Manufacturing leadership discussions",
       "topics": [
         "strategy",
         "planning",
         "budget",
-        "priorities"
+        "priorities",
+        "executive decisions"
       ]
     },
     {
-      "id": "post-mortems",
-      "name": "#post-mortems",
+      "id": "production-reviews",
+      "name": "#production-reviews",
       "isPrivate": true,
-      "description": "Post-incident review discussions",
+      "description": "Post-production incident review discussions",
       "topics": [
-        "post-mortems",
-        "root cause",
+        "incident reviews",
+        "root cause analysis",
         "action items",
-        "lessons learned"
+        "lessons learned",
+        "process improvements"
       ]
     }
   ],

@@ -23,7 +23,7 @@ type SlackMsg = {
   actions?: MessageAction[]
 }
 type ChatItem = { id: string; name: string; unread?: number; type: 'starred' | 'dm' | 'channel'; avatar?: string; statusEmoji?: string; isOnline?: boolean; isPrivate?: boolean }
-type Person = { name: string; avatar: string | null; initials?: string; gender?: string; country?: string; role?: string; me?: boolean; "emoji-heavy"?: boolean; verbose?: boolean }
+type Person = { name: string; avatar: string; initials: string; gender?: string; country?: string; role?: string; me?: boolean; "emoji-heavy"?: boolean; verbose?: boolean }
 type ThemeColors = {
   leftmostPanel: string
   mainBackground: string
@@ -62,7 +62,7 @@ type Theme = {
 }
 
 export default function SlackPage() {
-  const [selectedChat, setSelectedChat] = useState<string>('CHG-189')
+  const [selectedChat, setSelectedChat] = useState<string>('production-line-sindelfingen')
   const [chatMessages, setChatMessages] = useState<Record<string, SlackMsg[]>>({})
   const slackRootRef = useRef<HTMLDivElement | null>(null)
   const prevSelectedChatRef = useRef<string>(selectedChat)
@@ -95,8 +95,9 @@ export default function SlackPage() {
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({})
   
   // State for online status - tracks which users are online/offline
-  const [onlineStatus, setOnlineStatus] = useState<Record<string, boolean>>({
-    'rovo': true,
+  // STATIC - statuses never change after initial load
+  const [onlineStatus] = useState<Record<string, boolean>>({
+    'merc-ai': true,
     'alice': false,
     'bob': false,
     'carol': true,
@@ -174,14 +175,19 @@ export default function SlackPage() {
   // Helper to get avatar from people data
   const getAvatar = (name: string): string | null => {
     const person = getPerson(name)
+    // Return avatar if found, otherwise null
     return person?.avatar || null
   }
   
   // Helper to get initials from name
   const getInitials = (name: string): string => {
     const person = getPerson(name)
-    if (person?.initials) return person.initials
+    // Always use stored initials from people.json if available
+    if (person?.initials) {
+      return person.initials
+    }
     
+    // Fallback: generate initials from name
     const nameParts = name.split(' ')
     return nameParts.length >= 2 
       ? (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase()
@@ -209,16 +215,22 @@ export default function SlackPage() {
 
   // Helper to get people excluding current user
   const getOtherPeople = React.useMemo(() => {
-    return people.filter(p => p.n !== getCurrentUser)
+    // Filter out current user, AI Assistant, and system accounts like Workday
+    return people.filter(p => {
+      const person = peopleData.find((pp: Person) => pp.name === p.n)
+      return p.n !== getCurrentUser && 
+             person?.role !== 'AI Assistant' && 
+             person?.role !== 'HR System'
+    })
   }, [people, getCurrentUser])
 
   // Helper to get person name from chat ID
   const getPersonNameFromChatId = (chatId: string): string | null => {
     // First check if it's the AI assistant
     const aiAssistant = peopleData.find((p: Person) => p.role === 'AI Assistant')
-    const aiAssistantName = aiAssistant?.name || 'Rovo'
+    const aiAssistantName = aiAssistant?.name || 'Merc AI'
     const aiAssistantId = aiAssistantName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-    if (chatId === aiAssistantId || chatId === 'rovo' || chatId === 'bottleneckbot' || chatId === 'astra') {
+    if (chatId === aiAssistantId || chatId === 'merc-ai' || chatId === 'bottleneckbot' || chatId === 'astra') {
       return aiAssistantName
     }
     
@@ -233,16 +245,16 @@ export default function SlackPage() {
     
     // Fallback to hardcoded map for default setup
     const chatMap: Record<string, string> = {
-      'rovo': 'Rovo',
-      'alice': 'Alice Carlysle',
-      'bob': 'Bob Jenkins',
-      'carol': 'Carol Diaz',
+      'merc-ai': 'Merc AI',
+      'hannah': 'Hannah Wolf',
+      'felix': 'Felix Schäfer',
+      'mia': 'Mia Zimmermann',
       'eve': 'Eve Park',
       'james': 'James Bryant',
       'priya': 'Priya Shah',
-      'david': 'David Chen',
+      'alexander': 'Alexander Schneider',
       'sarah': 'Sarah Kim',
-      'mike': 'Mike Rodriguez',
+      'paul': 'Paul Bauer',
     }
     return chatMap[chatId] || null
   }
@@ -323,7 +335,16 @@ export default function SlackPage() {
   }
 
   // Helper to get reactions for important/celebratory messages
-  const getReactionsForMessage = (text: string, chatId: string, chatName: string, pickFn: <T,>(arr: T[]) => T): Record<string, number> | undefined => {
+  const getReactionsForMessage = (text: string, chatId: string, chatName: string, pickFn: <T,>(arr: T[]) => T, senderName?: string): Record<string, number> | undefined => {
+    // Skip reactions for bot/system accounts (Workday, Merc AI)
+    if (senderName) {
+      const personObj = getPerson(senderName)
+      const isBotAccount = personObj?.role === 'AI Assistant' || personObj?.role === 'HR System' || senderName === 'Workday' || senderName === 'Merc AI'
+      if (isBotAccount) {
+        return undefined
+      }
+    }
+    
     // Strip HTML tags for keyword detection
     const textWithoutHtml = text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ')
     const lowerText = textWithoutHtml.toLowerCase()
@@ -338,18 +359,24 @@ export default function SlackPage() {
     const hasImportant = importantKeywords.some(keyword => lowerText.includes(keyword))
     const hasEmoji = text.includes('🚀') || text.includes('🎉') || text.includes('🏆') || text.includes('💡') || text.includes('📢') || text.includes('✅')
     
-    // Only add reactions to some messages (not all)
-    if (!hasCelebratory && !hasImportant && !hasEmoji) return undefined
-    
-    // More reactions in general channel and large channels - make it more likely
-    const reactionChance = isGeneral ? 0.9 : (isLargeChannel ? 0.7 : 0.5)
-    if (Math.random() > reactionChance) return undefined
+    // General channel messages ALWAYS get reactions (they're all company-wide announcements)
+    if (isGeneral) {
+      // Always add reactions to general channel messages
+    } else {
+      // Only add reactions to some messages (not all) for other channels
+      if (!hasCelebratory && !hasImportant && !hasEmoji) return undefined
+      
+      // More reactions in large channels - make it more likely
+      const reactionChance = isLargeChannel ? 0.7 : 0.5
+      if (Math.random() > reactionChance) return undefined
+    }
     
     const reactions: Record<string, number> = {}
     const reactionEmojis = ['👍', '❤️', '🎉', '🔥', '👏', '😮', '🙏', '✅', '🚀', '💯']
     
-    // Add 1-4 reactions
-    const numReactions = isGeneral ? Math.floor(Math.random() * 3) + 2 : Math.floor(Math.random() * 2) + 1
+    // General channel messages get more reactions (3-6 reactions) since they're important announcements
+    // Other channels get fewer reactions (1-3 reactions)
+    const numReactions = isGeneral ? Math.floor(Math.random() * 4) + 3 : Math.floor(Math.random() * 2) + 1
     
     for (let i = 0; i < numReactions; i++) {
       const availableEmojis = reactionEmojis.filter(e => !reactions[e])
@@ -362,13 +389,33 @@ export default function SlackPage() {
   }
 
   // Helper to add italics and URLs to messages
-  const addFormattingAndLinks = (text: string, pickFn: <T,>(arr: T[]) => T): string => {
-    // Skip formatting for HTML messages (rich text announcements)
-    if (text.includes('<strong>') || text.includes('<br>') || text.includes('<ul>') || text.includes('<li>')) {
+  // Helper to convert plain URLs to clickable links
+  const convertUrlsToLinks = (text: string): string => {
+    // Don't convert if already contains HTML anchor tags
+    if (text.includes('<a href')) {
       return text
     }
     
+    // Regex to match URLs (http://, https://, www.)
+    const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`\[\]]+)/gi
+    return text.replace(urlRegex, (url) => {
+      // Don't double-wrap if already a link
+      if (url.includes('<a')) return url
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: #1D9BD1; text-decoration: underline;">${url}</a>`
+    })
+  }
+
+  const addFormattingAndLinks = (text: string, pickFn: <T,>(arr: T[]) => T): string => {
+    // Skip formatting for HTML messages (rich text announcements)
+    if (text.includes('<strong>') || text.includes('<br>') || text.includes('<ul>') || text.includes('<li>')) {
+      // Still convert plain URLs to links even in HTML messages
+      return convertUrlsToLinks(text)
+    }
+    
     let formatted = text
+    
+    // Convert any plain URLs to links first
+    formatted = convertUrlsToLinks(formatted)
     
     // Add occasional italics (20% chance)
     if (Math.random() < 0.2) {
@@ -440,12 +487,13 @@ export default function SlackPage() {
 
   // Helper to enhance message based on person traits
   const enhanceMessage = (text: string, person: Person, pickFn: <T,>(arr: T[]) => T): string => {
+    // Always convert plain URLs to links first
+    let enhanced = convertUrlsToLinks(text)
+    
     // Skip enhancement for HTML messages (rich text announcements)
     if (text.includes('<strong>') || text.includes('<br>') || text.includes('<ul>') || text.includes('<li>')) {
-      return text
+      return enhanced
     }
-    
-    let enhanced = text
     
     // Add formatting (italics and URLs)
     enhanced = addFormattingAndLinks(enhanced, pickFn)
@@ -507,7 +555,7 @@ export default function SlackPage() {
 
   // Get AI assistant info early
   const aiAssistant = (peopleData as Person[]).find(p => p.role === 'AI Assistant');
-  const aiAssistantName = aiAssistant?.name || 'Rovo';
+  const aiAssistantName = aiAssistant?.name || 'Merc AI';
   const aiAssistantId = aiAssistantName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
   // Chat list items organized by sections (unread counts come from state)
@@ -526,7 +574,7 @@ export default function SlackPage() {
   const dmChats: ChatItem[] = React.useMemo(() => {
     const allPeople = (peopleData as Person[])
     const aiAssistant = allPeople.find(p => p.role === 'AI Assistant')
-    const aiAssistantName = aiAssistant?.name || 'Rovo'
+    const aiAssistantName = aiAssistant?.name || 'Merc AI'
     const aiAssistantId = aiAssistantName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
     const currentUser = allPeople.find(p => p.me === true)
     const currentUserName = currentUser?.name || 'James McGill'
@@ -537,13 +585,17 @@ export default function SlackPage() {
     // Create individual DMs
     const individualDMs: ChatItem[] = dmPeople.map(person => {
       const chatId = person.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+      // Don't show online status for system accounts (HR System, etc.)
+      const isSystemAccount = person.role === 'HR System' || person.role === 'AI Assistant'
       return {
         id: chatId,
         name: person.name,
         unread: unreadCounts[chatId] || 0,
         type: 'dm' as const,
         avatar: getAvatar(person.name) || undefined,
-        isOnline: onlineStatus[chatId] ?? Math.random() > 0.5
+        // Static online status - use stored value or default to true (online)
+        // No random assignment - statuses are fixed
+        isOnline: isSystemAccount ? undefined : (onlineStatus[chatId] ?? true)
       }
     })
     
@@ -554,7 +606,7 @@ export default function SlackPage() {
       unread: unreadCounts[aiAssistantId] || 0,
       type: 'dm',
       avatar: getAvatar(aiAssistantName) || undefined,
-      isOnline: onlineStatus[aiAssistantId] ?? true
+      isOnline: undefined // No online status for AI assistant
     }
     
     // Create group DMs from channel-config.json if available
@@ -610,7 +662,7 @@ export default function SlackPage() {
     
     // Check if this is an AI Assistant conversation
     const aiAssistant = peopleData.find((p: Person) => p.role === 'AI Assistant')
-    const aiAssistantName = aiAssistant?.name || 'Rovo'
+    const aiAssistantName = aiAssistant?.name || 'Merc AI'
     if (personName === aiAssistantName || personRole === 'AI Assistant') {
       return generateAIAssistantMessage(currentUserName, conversationHistory, companyDesc, companyName, industry, pick)
     }
@@ -637,7 +689,7 @@ export default function SlackPage() {
     pick: <T,>(arr: T[]) => T
   ): { who: string, text: string } => {
     const aiAssistant = peopleData.find((p: Person) => p.role === 'AI Assistant')
-    const aiAssistantName = aiAssistant?.name || 'Rovo'
+    const aiAssistantName = aiAssistant?.name || 'Merc AI'
     const descLower = companyDesc.toLowerCase()
     
     // Determine if user or AI is speaking
@@ -648,6 +700,7 @@ export default function SlackPage() {
     if (isAITurn) {
       // AI Assistant responses
       const hasITSM = descLower.includes('incident') || descLower.includes('itom') || descLower.includes('itsm') || descLower.includes('service management') || descLower.includes('change management') || descLower.includes('monitoring') || descLower.includes('operations')
+      const hasAutomotive = descLower.includes('automotive') || descLower.includes('vehicle') || descLower.includes('manufacturing') || descLower.includes('production') || descLower.includes('assembly') || industry.toLowerCase().includes('automotive')
       
       // Check if last user message was asking for a Confluence doc
       const lastUserMessage = conversationHistory.length > 0 && conversationHistory[conversationHistory.length - 1].who === currentUserName 
@@ -657,7 +710,14 @@ export default function SlackPage() {
       
       if (askedForConfluence) {
         // Generate specific Confluence doc response with embed link
-        const confluenceTopics = hasITSM ? [
+        const hasAutomotive = descLower.includes('automotive') || descLower.includes('vehicle') || descLower.includes('manufacturing') || descLower.includes('production') || descLower.includes('assembly') || industry.toLowerCase().includes('automotive')
+        const confluenceTopics = hasAutomotive ? [
+          { topic: 'production line efficiency improvements', docId: 45231 },
+          { topic: 'quality control process optimization', docId: 46892 },
+          { topic: 'supply chain coordination best practices', docId: 47561 },
+          { topic: 'plant operations best practices', docId: 48923 },
+          { topic: 'vehicle assembly procedures', docId: 49245 }
+        ] : hasITSM ? [
           { topic: 'incident response runbook improvements', docId: 45231 },
           { topic: 'change management process optimization', docId: 46892 },
           { topic: 'post-incident review best practices', docId: 47561 },
@@ -674,11 +734,22 @@ export default function SlackPage() {
         
         return {
           who: aiAssistantName,
-          text: `I've created a Confluence document outlining ideas for ${selectedTopic.topic}. Here's the link: ${confluenceUrl}`
+          text: `I've created a Confluence document outlining ideas for ${selectedTopic.topic}. Here's the link: <a href="${confluenceUrl}" target="_blank" rel="noopener noreferrer" style="color: #1D9BD1; text-decoration: underline;">${confluenceUrl}</a>`
         }
       }
       
-      const responses = hasITSM ? [
+      const responses = hasAutomotive ? [
+        `I've summarized the key points from ${companyName}'s production planning review. The main focus areas are: improving production line efficiency, enhancing quality control processes, and optimizing supply chain coordination. Should I create a detailed action plan?`,
+        `Here's your task summary for this week: ${Math.floor(Math.random() * 5) + 3} items pending review, ${Math.floor(Math.random() * 3) + 2} meetings scheduled, and ${Math.floor(Math.random() * 4) + 1} production line reviews in progress. Want me to prioritize these?`,
+        `I've analyzed the production metrics from last week. Manufacturing performance is stable with quality rates within target. The main improvement areas are assembly line optimization and supplier coordination. Should I prepare a detailed report?`,
+        `Reminder: You have a production review meeting in ${Math.floor(Math.random() * 2) + 1} hours. Agenda includes reviewing plant operations and discussing quality control improvements. I've prepared talking points based on recent discussions.`,
+        `I've compiled a summary of all production-related discussions from #production-alerts this week. Key topics: production line efficiency improvements, quality control process updates, and supply chain coordination enhancements. Want the full breakdown?`,
+        `Your calendar shows ${Math.floor(Math.random() * 3) + 2} meetings today. I've identified ${Math.floor(Math.random() * 2) + 1} potential conflicts and ${Math.floor(Math.random() * 3) + 1} follow-up tasks from yesterday's production review. Should I help reschedule?`,
+        `I've tracked ${Math.floor(Math.random() * 10) + 5} action items from last week's manufacturing planning session. ${Math.floor(Math.random() * 5) + 3} are completed, ${Math.floor(Math.random() * 3) + 2} are in progress, and ${Math.floor(Math.random() * 2) + 1} need attention. Here's the status update.`,
+        `Quick summary of ${companyName}'s production performance: All plants operational, quality metrics within target, no critical production issues reported. Manufacturing shows stable performance across all global facilities.`,
+        `I've prepared a briefing for your upcoming plant operations review meeting. It includes recent production metrics, quality control updates, and recommended discussion points. Should I share it now?`,
+        `Task reminder: Production line optimization review is due ${Math.floor(Math.random() * 3) + 1} days from now. I've gathered the relevant context and can help you prepare.`
+      ] : hasITSM ? [
         `I've summarized the key points from ${companyName}'s incident management review. The main focus areas are: improving incident response times, enhancing change management processes, and optimizing infrastructure monitoring. Should I create a detailed action plan?`,
         `Here's your task summary for this week: ${Math.floor(Math.random() * 5) + 3} items pending review, ${Math.floor(Math.random() * 3) + 2} meetings scheduled, and ${Math.floor(Math.random() * 4) + 1} change request reviews in progress. Want me to prioritize these?`,
         `I've analyzed the infrastructure monitoring metrics from last week. System performance is stable with response times within SLA. The main improvement areas are alert threshold optimization and incident detection accuracy. Should I prepare a detailed report?`,
@@ -705,8 +776,23 @@ export default function SlackPage() {
     } else {
       // User messages to AI Assistant
       const hasITSM = descLower.includes('incident') || descLower.includes('itom') || descLower.includes('itsm') || descLower.includes('service management') || descLower.includes('change management') || descLower.includes('monitoring') || descLower.includes('operations')
+      const hasAutomotive = descLower.includes('automotive') || descLower.includes('vehicle') || descLower.includes('manufacturing') || descLower.includes('production') || descLower.includes('assembly') || industry.toLowerCase().includes('automotive')
       
-      const userMessages = hasITSM ? [
+      const userMessages = hasAutomotive ? [
+        `Can you summarize the key points from the production planning discussion in #production-alerts?`,
+        `What are my pending tasks for this week?`,
+        `Give me a summary of ${companyName}'s production metrics`,
+        `Remind me about my meetings today`,
+        `What action items came out of last week's quality control review?`,
+        `Can you prepare a briefing for my plant operations review meeting?`,
+        `Summarize the production line updates from this week`,
+        `What's on my calendar for tomorrow?`,
+        `Help me prioritize my tasks for manufacturing work`,
+        `Can you create a summary of production efficiency metrics?`,
+        `Can you create a quick Confluence doc about drafting some ideas for improving our production line efficiency? I want to document best practices for quality control`,
+        `Create a Confluence page with ideas for optimizing our supply chain coordination process`,
+        `I need a Confluence doc outlining our plant operations process improvements`
+      ] : hasITSM ? [
         `Can you summarize the key points from the incident management discussion in #incidents?`,
         `What are my pending tasks for this week?`,
         `Give me a summary of ${companyName}'s infrastructure monitoring metrics`,
@@ -1396,14 +1482,23 @@ export default function SlackPage() {
       const topicsLower = topics.join(' ').toLowerCase()
       
       // Match roles to channel topics
-      if (descLower.includes('engineering') || topicsLower.includes('code') || topicsLower.includes('pr')) {
-        return role.includes('engineer') || role.includes('developer')
+      if (descLower.includes('manufacturing') || topicsLower.includes('production') || topicsLower.includes('assembly') || topicsLower.includes('plant')) {
+        return role.includes('manufacturing') || role.includes('production') || role.includes('engineer') || role.includes('manager') || role.includes('supervisor')
+      }
+      if (descLower.includes('quality') || topicsLower.includes('inspection') || topicsLower.includes('defect')) {
+        return role.includes('quality') || role.includes('engineer') || role.includes('inspector') || role.includes('manager')
+      }
+      if (descLower.includes('supply chain') || topicsLower.includes('supplier') || topicsLower.includes('logistics')) {
+        return role.includes('supply') || role.includes('logistics') || role.includes('procurement') || role.includes('manager')
+      }
+      if (descLower.includes('engineering') || topicsLower.includes('code') || topicsLower.includes('pr') || topicsLower.includes('r-d') || topicsLower.includes('design')) {
+        return role.includes('engineer') || role.includes('developer') || role.includes('design')
       }
       if (descLower.includes('product') || topicsLower.includes('feature') || topicsLower.includes('roadmap')) {
         return role.includes('product') || role.includes('manager')
       }
       if (descLower.includes('operation') || topicsLower.includes('deployment') || topicsLower.includes('infrastructure')) {
-        return role.includes('devops') || role.includes('sre') || role.includes('operation')
+        return role.includes('devops') || role.includes('sre') || role.includes('operation') || role.includes('manager')
       }
       if (descLower.includes('design') || topicsLower.includes('ui') || topicsLower.includes('ux')) {
         return role.includes('design')
@@ -1415,10 +1510,20 @@ export default function SlackPage() {
     const lastSender = conversationHistory && conversationHistory.length > 0 ? conversationHistory[conversationHistory.length - 1].who : null
     const availableSpeakers = relevantPeople.length > 0 
       ? relevantPeople.filter(p => p !== lastSender)
-      : people.map(p => p.n).filter(n => n !== getCurrentUser && n !== lastSender)
+      : people.map(p => p.n).filter(n => {
+        const person = peopleData.find((pp: Person) => pp.name === n)
+        return n !== getCurrentUser && n !== lastSender && 
+               person?.role !== 'AI Assistant' && 
+               person?.role !== 'HR System'
+      })
     
     // If no available speakers (edge case), use all speakers
-    const speakerCandidates = availableSpeakers.length > 0 ? availableSpeakers : (relevantPeople.length > 0 ? relevantPeople : people.map(p => p.n).filter(n => n !== getCurrentUser))
+    const speakerCandidates = availableSpeakers.length > 0 ? availableSpeakers : (relevantPeople.length > 0 ? relevantPeople : people.map(p => p.n).filter(n => {
+      const person = peopleData.find((pp: Person) => pp.name === n)
+      return n !== getCurrentUser && 
+             person?.role !== 'AI Assistant' && 
+             person?.role !== 'HR System'
+    }))
     const speaker = pick(speakerCandidates)
     const speakerPerson = getPerson(speaker)
     const speakerEmojiHeavy = speakerPerson?.['emoji-heavy'] || false
@@ -1430,6 +1535,54 @@ export default function SlackPage() {
     if (topics.length > 0) {
       topics.forEach(topic => {
         const topicLower = topic.toLowerCase()
+        // Manufacturing and automotive topics
+        if (topicLower.includes('production') || topicLower.includes('manufacturing')) {
+          const plant = pick(['Sindelfingen', 'Tuscaloosa', 'Beijing', 'Pune', 'East London'])
+          const vehicleModel = pick(['E-Class', 'S-Class', 'C-Class', 'GLE', 'EQS', 'EQE'])
+          messages.push(`Production update from ${plant} plant: Line ${Math.floor(Math.random() * 5) + 1} running at ${Math.floor(Math.random() * 10) + 90}% efficiency`)
+          messages.push(`${vehicleModel} production target met - ${Math.floor(Math.random() * 50) + 200} units completed today`)
+          messages.push(`Production line ${Math.floor(Math.random() * 3) + 1} scheduled maintenance completed. Resuming normal operations`)
+          messages.push(`Global production status: ${Math.floor(Math.random() * 5) + 8} plants operational, ${Math.floor(Math.random() * 500) + 2000} vehicles produced today`)
+        }
+        if (topicLower.includes('quality') || topicLower.includes('inspection') || topicLower.includes('defect')) {
+          messages.push(`Quality control report: ${Math.floor(Math.random() * 5) + 95}% pass rate on final inspection`)
+          messages.push(`Defect rate reduced to ${Math.floor(Math.random() * 2) + 0.1}% - excellent work team!`)
+          messages.push(`Quality inspection completed: ${Math.floor(Math.random() * 100) + 50} vehicles checked, all standards met`)
+          messages.push(`Quality alert: Minor issue detected in ${pick(['paint finish', 'interior trim', 'electrical systems', 'engine assembly'])}. Investigation in progress`)
+        }
+        if (topicLower.includes('supply chain') || topicLower.includes('supplier') || topicLower.includes('logistics')) {
+          const supplier = pick(['Bosch', 'Continental', 'ZF', 'Magna', 'Lear'])
+          const part = pick(['brake systems', 'transmission components', 'electronics', 'seats', 'batteries'])
+          messages.push(`Supply chain update: ${supplier} delivery on schedule. ${part} inventory at ${Math.floor(Math.random() * 20) + 80}% capacity`)
+          messages.push(`Global logistics: ${Math.floor(Math.random() * 10) + 5} shipments en route from ${pick(['Germany', 'China', 'USA', 'Mexico'])}`)
+          messages.push(`Supplier coordination: ${supplier} confirmed delivery of ${part} for next week's production run`)
+          messages.push(`Supply chain alert: Potential delay from ${supplier}. Exploring alternative suppliers`)
+        }
+        if (topicLower.includes('assembly') || topicLower.includes('line')) {
+          messages.push(`Assembly line ${Math.floor(Math.random() * 5) + 1}: ${Math.floor(Math.random() * 20) + 40} vehicles per hour - target exceeded`)
+          messages.push(`Line balancing update: Workstation ${Math.floor(Math.random() * 20) + 1} optimized. Cycle time reduced by ${Math.floor(Math.random() * 10) + 5}%`)
+          messages.push(`Assembly quality check: ${Math.floor(Math.random() * 100) + 200} vehicles assembled today, zero defects`)
+          messages.push(`Assembly line status: All ${Math.floor(Math.random() * 5) + 3} lines operational. Production running smoothly`)
+        }
+        if (topicLower.includes('plant') || topicLower.includes('facility') || topicLower.includes('operations')) {
+          const plant = pick(['Sindelfingen', 'Tuscaloosa', 'Beijing', 'Pune', 'East London', 'Hambach'])
+          messages.push(`${plant} plant operations: All shifts running normally. Safety metrics excellent`)
+          messages.push(`Plant maintenance scheduled for ${pick(['weekend', 'next week', 'next month'])}. Production plan adjusted`)
+          messages.push(`Global plant coordination: ${plant} plant sharing best practices with ${pick(['Tuscaloosa', 'Beijing', 'Pune'])}`)
+          messages.push(`Plant operations update: ${plant} facility operating at ${Math.floor(Math.random() * 10) + 90}% capacity`)
+        }
+        if (topicLower.includes('electric') || topicLower.includes('ev') || topicLower.includes('battery')) {
+          messages.push(`EV production update: EQS and EQE lines running at full capacity. ${Math.floor(Math.random() * 50) + 100} EVs produced today`)
+          messages.push(`Battery assembly: Quality checks passed. ${Math.floor(Math.random() * 100) + 200} battery packs assembled`)
+          messages.push(`Electric vehicle delivery: ${Math.floor(Math.random() * 50) + 50} EVs shipped to ${pick(['Europe', 'North America', 'Asia'])} this week`)
+          messages.push(`EV charging infrastructure: ${Math.floor(Math.random() * 10) + 5} new charging stations installed at ${pick(['Sindelfingen', 'Tuscaloosa'])} plant`)
+        }
+        if (topicLower.includes('vehicle') || topicLower.includes('delivery') || topicLower.includes('shipping')) {
+          const model = pick(['E-Class', 'S-Class', 'C-Class', 'GLE', 'EQS', 'GLC'])
+          messages.push(`Vehicle delivery: ${Math.floor(Math.random() * 100) + 200} ${model} units shipped to ${pick(['dealers', 'customers', 'distribution centers'])}`)
+          messages.push(`Global delivery status: ${Math.floor(Math.random() * 1000) + 5000} vehicles in transit across ${pick(['Europe', 'Americas', 'Asia-Pacific'])}`)
+          messages.push(`Customer delivery coordination: ${Math.floor(Math.random() * 50) + 100} vehicles ready for customer pickup this week`)
+        }
         if (topicLower.includes('content') || topicLower.includes('moderation')) {
           messages.push(`Content moderation update: ${Math.floor(Math.random() * 50) + 10} items reviewed today`)
           messages.push(`New content feature is ready for review. Can everyone take a look?`)
@@ -1490,11 +1643,25 @@ export default function SlackPage() {
           `Monitoring shows stable performance`
         ]
       } else {
-        // ITSM/ITOM fallback messages
+        // Check for manufacturing/automotive context
         const descLower = companyDesc.toLowerCase()
+        const hasManufacturing = descLower.includes('manufacturing') || descLower.includes('automotive') || descLower.includes('production') || descLower.includes('vehicle') || descLower.includes('plant')
         const hasITSM = descLower.includes('incident') || descLower.includes('itom') || descLower.includes('itsm') || descLower.includes('service management') || descLower.includes('change management') || descLower.includes('monitoring') || descLower.includes('operations')
         
-        if (hasITSM) {
+        if (hasManufacturing) {
+          const plant = pick(['Sindelfingen', 'Tuscaloosa', 'Beijing', 'Pune', 'East London'])
+          const model = pick(['E-Class', 'S-Class', 'C-Class', 'GLE', 'EQS', 'EQE'])
+          messages = [
+            `${plant} plant operations: Production running smoothly. All lines operational`,
+            `Global manufacturing update: ${Math.floor(Math.random() * 5) + 8} plants operational worldwide`,
+            `Quality control: ${Math.floor(Math.random() * 5) + 95}% pass rate on vehicle inspections`,
+            `Supply chain status: All suppliers delivering on schedule`,
+            `${model} production: ${Math.floor(Math.random() * 100) + 200} units completed today`,
+            `Plant operations: All shifts running normally. Safety metrics excellent`,
+            `Vehicle delivery: ${Math.floor(Math.random() * 100) + 200} vehicles shipped globally`,
+            `Production planning: Next week's schedule confirmed. Capacity at ${Math.floor(Math.random() * 10) + 90}%`
+          ]
+        } else if (hasITSM) {
           messages = [
             `Monitoring shows all systems operational. No incidents reported`,
             `Change request review completed. Ready for deployment`,
@@ -1542,132 +1709,137 @@ export default function SlackPage() {
     const channelMessageGenerators: Record<string, () => { who: string, text: string }> = {
       'itom-4412': () => {
         const incidentId = Math.floor(Math.random() * 5000) + 4000
+        const plant = pick(['Sindelfingen', 'Tuscaloosa', 'Beijing', 'Pune', 'East London'])
         const scenarios = [
           {
-            who: 'Rovo',
-            text: `Incident #${incidentId} detected: Payment API latency spike detected. P95 latency increased from ${Math.floor(Math.random() * 100) + 150}ms to ${Math.floor(Math.random() * 500) + 600}ms in ${pick(['us-east-1', 'us-west-2', 'eu-west-1', 'ap-southeast-1'])} region. Affecting approximately ${Math.floor(Math.random() * 20) + 5}% of payment transactions. Root cause analysis in progress.`
+            who: 'Merc AI',
+            text: `Production alert #${incidentId} detected: Assembly line ${Math.floor(Math.random() * 5) + 1} stoppage at ${plant} plant. Line efficiency dropped from ${Math.floor(Math.random() * 10) + 90}% to ${Math.floor(Math.random() * 20) + 40}%. Affecting ${pick(['E-Class', 'S-Class', 'C-Class', 'GLE', 'EQS'])} production. Root cause analysis in progress.`
           },
           {
-            who: pick(['Alice Carlysle', 'Bob Jenkins', 'Carol Diaz']),
-            text: `Checking CloudWatch metrics now. Seeing connection pool exhaustion warnings - current utilization at ${Math.floor(Math.random() * 20) + 85}%. Also noticing increased error rates in the payment service logs, primarily 503s and timeouts.`
+            who: pick(['Hannah Wolf', 'Felix Schäfer', 'Mia Zimmermann']),
+            text: `Checking production monitoring systems. Seeing ${pick(['robotic arm malfunction', 'conveyor belt sensor failure', 'quality control station alert', 'component supply interruption'])} - current line status: ${pick(['stopped', 'reduced speed', 'manual operation'])}. Also noticing ${pick(['increased defect rate', 'component alignment issues', 'paint finish problems'])} in recent quality checks.`
           },
           {
-            who: pick(['Bob Jenkins', 'David Chen', 'Sarah Kim']),
-            text: `I can see the DB connection pool is at ${Math.floor(Math.random() * 10) + 90}% capacity. Query times have increased by ${Math.floor(Math.random() * 200) + 100}ms. Should we scale up the RDS instance or increase the connection pool size?`
+            who: pick(['Felix Schäfer', 'Alexander Schneider', 'Sarah Kim']),
+            text: `I can see the ${pick(['welding station', 'paint booth', 'assembly workstation', 'quality inspection point'])} is showing ${pick(['equipment error codes', 'sensor failures', 'component shortages'])}. Cycle time increased by ${Math.floor(Math.random() * 30) + 15} seconds. Should we ${pick(['switch to backup equipment', 'adjust production schedule', 'notify maintenance team'])}?`
           },
           {
-            who: 'Rovo',
-            text: `Auto-correlation suggests DB pool saturation is the primary bottleneck. Recommending: scale RDS nodes +${Math.floor(Math.random() * 3) + 2}, increase connection pool size from ${Math.floor(Math.random() * 30) + 40} to ${Math.floor(Math.random() * 50) + 80}. Estimated resolution time: ${Math.floor(Math.random() * 10) + 5} minutes.`
+            who: 'Merc AI',
+            text: `Auto-correlation suggests ${pick(['component supply chain delay', 'equipment maintenance overdue', 'quality control threshold exceeded', 'workstation calibration needed'])} is the primary bottleneck. Recommending: ${pick(['activate backup production line', 'adjust component sourcing', 'schedule immediate maintenance', 'recalibrate quality sensors'])}. Estimated resolution time: ${Math.floor(Math.random() * 60) + 30} minutes.`
           },
           {
-            who: pick(['Carol Diaz', 'Mike Rodriguez', 'Alex Thompson']),
-            text: `On it. Scaling DB cluster now - adding ${Math.floor(Math.random() * 2) + 2} read replicas and increasing connection pool. ETA ${Math.floor(Math.random() * 5) + 5} minutes. Will monitor metrics closely during the scale-up.`
+            who: pick(['Mia Zimmermann', 'Paul Bauer', 'Alex Thompson']),
+            text: `On it. ${pick(['Coordinating with maintenance team', 'Contacting supplier for expedited delivery', 'Switching to backup equipment', 'Adjusting production schedule'])} now. ETA ${Math.floor(Math.random() * 45) + 15} minutes. Will monitor production metrics closely during resolution.`
           },
           {
             who: pick(['Eve Park', 'James Bryant', 'Priya Shah']),
-            text: `p95 latency improved to ${Math.floor(Math.random() * 100) + 250}ms after DB scaling ✅ Connection pool utilization now at ${Math.floor(Math.random() * 15) + 55}%. Monitoring shows no further spikes. Incident resolved.`
+            text: `Line efficiency improved to ${Math.floor(Math.random() * 10) + 85}% after ${pick(['maintenance completed', 'component delivery', 'equipment switch', 'calibration'])} ✅ Production back to normal. Monitoring shows stable performance. Incident resolved.`
           },
           {
-            who: pick(['Sarah Kim', 'David Chen', 'Carol Diaz']),
-            text: `Post-mortem scheduled for tomorrow at ${Math.floor(Math.random() * 4) + 2} PM. I'll send out the incident timeline and root cause analysis doc by EOD. Key learnings: need better connection pool monitoring and automated scaling triggers. <a href="https://wiki.company.com/postmortems/${Math.floor(Math.random() * 5000) + 4000}" style="color: #1D9BD1; text-decoration: underline;">Doc link here</a>.`
+            who: pick(['Sarah Kim', 'Alexander Schneider', 'Mia Zimmermann']),
+            text: `Post-production review scheduled for tomorrow at ${Math.floor(Math.random() * 4) + 2} PM. I'll send out the incident timeline and root cause analysis doc by EOD. Key learnings: need better ${pick(['predictive maintenance scheduling', 'supplier coordination protocols', 'quality control monitoring', 'equipment redundancy'])}. <a href="https://wiki.mercedes-benz.com/postmortems/${Math.floor(Math.random() * 5000) + 4000}" target="_blank" rel="noopener noreferrer" style="color: #1D9BD1; text-decoration: underline;">Doc link here</a>.`
           },
           {
-            who: pick(['Rovo', 'Alice Carlysle', 'Bob Jenkins']),
-            text: `Monitoring shows stable performance over the past ${Math.floor(Math.random() * 3) + 2} hours. All metrics back within normal ranges. Incident #${incidentId} can be marked as resolved.`
+            who: pick(['Merc AI', 'Hannah Wolf', 'Felix Schäfer']),
+            text: `Monitoring shows stable production over the past ${Math.floor(Math.random() * 3) + 2} hours. All lines operational within normal parameters. Incident #${incidentId} can be marked as resolved.`
           }
         ]
         return pick(scenarios)
       },
       'incidents': () => {
         const incidentId = Math.floor(Math.random() * 5000) + 4000
+        const plant = pick(['Sindelfingen', 'Tuscaloosa', 'Beijing', 'Pune', 'East London'])
         const scenarios = [
           {
-            who: pick(['Eve Park', 'James Bryant', 'Rovo']),
-            text: `New incident opened: #${incidentId} - ${pick(['Payment API latency spike', 'Database connection pool exhaustion', 'CDN cache miss rate increase', 'API rate limiting threshold exceeded', 'Service degradation in us-east-1'])}. Severity: ${pick(['P1', 'P2', 'P3'])}. Assigning to on-call engineer.`
+            who: pick(['Eve Park', 'James Bryant', 'Merc AI']),
+            text: `New production incident opened: #${incidentId} - ${pick(['Assembly line stoppage', 'Quality control threshold exceeded', 'Component supply delay', 'Equipment malfunction', 'Production line efficiency drop'])} at ${plant} plant. Severity: ${pick(['P1', 'P2', 'P3'])}. Assigning to production operations team.`
           },
           {
             who: pick(['James Bryant', 'Priya Shah', 'Eve Park']),
-            text: `Incident #${incidentId} status update: ${pick(['Investigating', 'Identified', 'Monitoring', 'Resolved'])}. ${pick(['Root cause identified', 'Mitigation in progress', 'Stable for 30 minutes', 'All systems operational'])}. ETA for resolution: ${Math.floor(Math.random() * 60) + 15} minutes.`
+            text: `Incident #${incidentId} status update: ${pick(['Investigating', 'Identified', 'Monitoring', 'Resolved'])}. ${pick(['Root cause identified', 'Mitigation in progress', 'Stable for 30 minutes', 'All production lines operational'])}. ETA for resolution: ${Math.floor(Math.random() * 60) + 15} minutes.`
           },
           {
-            who: pick(['Rovo', 'Alice Carlysle', 'David Chen']),
-            text: `Initial assessment for #${incidentId}: ${pick(['DB connection pool exhaustion', 'API gateway timeout', 'Cache layer failure', 'Load balancer health check failures'])}. Mitigation in progress. Impact: ${Math.floor(Math.random() * 15) + 5}% of ${pick(['payment transactions', 'API requests', 'user sessions', 'data processing jobs'])}.`
+            who: pick(['Merc AI', 'Hannah Wolf', 'Alexander Schneider']),
+            text: `Initial assessment for #${incidentId}: ${pick(['Component supply chain interruption', 'Equipment maintenance overdue', 'Quality control sensor failure', 'Workstation calibration needed'])}. Mitigation in progress. Impact: ${Math.floor(Math.random() * 15) + 5}% of ${pick(['daily production target', 'vehicle assembly capacity', 'quality inspection throughput', 'component processing'])}.`
           },
           {
-            who: pick(['Sarah Kim', 'Mike Rodriguez', 'Emma Wilson']),
-            text: `Incident #${incidentId} post-mortem completed. Root cause: ${pick(['insufficient connection pool sizing', 'cascading failure from upstream service', 'memory leak in service instance', 'database query performance degradation'])}. Action items: ${pick(['implement auto-scaling', 'add circuit breakers', 'optimize database queries', 'increase monitoring coverage'])}. Doc link: https://wiki.company.com/postmortems/${incidentId}`
+            who: pick(['Sarah Kim', 'Paul Bauer', 'Emma Wilson']),
+            text: `Incident #${incidentId} post-production review completed. Root cause: ${pick(['insufficient preventive maintenance scheduling', 'supplier delivery delay', 'equipment wear beyond tolerance', 'quality control threshold calibration issue'])}. Action items: ${pick(['implement predictive maintenance schedule', 'establish backup supplier agreements', 'upgrade equipment monitoring systems', 'enhance quality control protocols'])}. <a href="https://wiki.mercedes-benz.com/postmortems/${incidentId}" target="_blank" rel="noopener noreferrer" style="color: #1D9BD1; text-decoration: underline;">Doc link here</a>`
           }
         ]
         return pick(scenarios)
       },
       'alerts': () => {
+        const plant = pick(['Sindelfingen', 'Tuscaloosa', 'Beijing', 'Pune', 'East London'])
         const scenarios = [
           {
-            who: pick(['Rovo', 'David Chen', 'Sarah Kim']),
-            text: `Alert: Payment API p95 latency exceeded threshold (${Math.floor(Math.random() * 300) + 600}ms > 500ms) in ${pick(['us-east-1', 'us-west-2', 'eu-west-1'])}. Duration: ${Math.floor(Math.random() * 10) + 5} minutes. Investigating root cause.`
+            who: pick(['Merc AI', 'Alexander Schneider', 'Sarah Kim']),
+            text: `Alert: Production line ${Math.floor(Math.random() * 5) + 1} efficiency dropped below threshold (${Math.floor(Math.random() * 10) + 70}% < 85%) at ${plant} plant. Duration: ${Math.floor(Math.random() * 30) + 10} minutes. Investigating root cause.`
           },
           {
-            who: pick(['David Chen', 'Alex Thompson', 'Lisa Anderson']),
-            text: `Acknowledged. Investigating root cause. Initial checks show ${pick(['database connection pool at 92%', 'increased error rates in payment service', 'CDN cache hit rate dropped to 65%', 'API gateway showing 503 errors'])}. Will update as I find more. Check the <a href="https://dashboard.company.com/incidents/${Math.floor(Math.random() * 5000) + 4000}" style="color: #1D9BD1; text-decoration: underline;">incident dashboard</a> for live updates.`
+            who: pick(['Alexander Schneider', 'Alex Thompson', 'Lisa Anderson']),
+            text: `Acknowledged. Investigating root cause. Initial checks show ${pick(['equipment utilization at 92%', 'increased defect rate in quality control', 'component inventory dropped to 65%', 'assembly workstation showing error codes'])}. Will update as I find more. Check the <a href="https://dashboard.mercedes-benz.com/production/${Math.floor(Math.random() * 5000) + 4000}" target="_blank" rel="noopener noreferrer" style="color: #1D9BD1; text-decoration: underline;">production dashboard</a> for live updates.`
           },
           {
-            who: pick(['Sarah Kim', 'Carol Diaz', 'Mike Rodriguez']),
-            text: `Found ${pick(['connection pool saturation', 'database query performance issue', 'upstream service degradation', 'cache layer failure'])}. ${pick(['Scaling infrastructure', 'Optimizing queries', 'Failing over to backup region', 'Clearing cache and warming up'])}. ETA ${Math.floor(Math.random() * 10) + 5} minutes.`
+            who: pick(['Sarah Kim', 'Mia Zimmermann', 'Paul Bauer']),
+            text: `Found ${pick(['component supply shortage', 'equipment calibration issue', 'quality control threshold exceeded', 'workstation maintenance needed'])}. ${pick(['Coordinating with suppliers', 'Scheduling maintenance', 'Switching to backup equipment', 'Adjusting production schedule'])}. ETA ${Math.floor(Math.random() * 45) + 15} minutes.`
           },
           {
-            who: pick(['Rovo', 'Eve Park', 'James Bryant']),
-            text: `Alert cleared: Payment API latency back to normal (${Math.floor(Math.random() * 100) + 180}ms). Monitoring for ${Math.floor(Math.random() * 30) + 15} minutes shows stable performance. All metrics within thresholds.`
+            who: pick(['Merc AI', 'Eve Park', 'James Bryant']),
+            text: `Alert cleared: Production line efficiency back to normal (${Math.floor(Math.random() * 10) + 88}%). Monitoring for ${Math.floor(Math.random() * 30) + 15} minutes shows stable performance. All metrics within thresholds.`
           },
           {
-            who: pick(['David Chen', 'Alex Thompson']),
-            text: `New alert: Database connection pool at ${Math.floor(Math.random() * 10) + 80}%. Current connections: ${Math.floor(Math.random() * 20) + 85}/${Math.floor(Math.random() * 10) + 90}. Recommend ${pick(['scaling up RDS instance', 'increasing pool size', 'investigating connection leaks'])}.`
+            who: pick(['Alexander Schneider', 'Alex Thompson']),
+            text: `New alert: Component inventory at ${Math.floor(Math.random() * 10) + 80}% capacity. Current stock: ${Math.floor(Math.random() * 20) + 85}/${Math.floor(Math.random() * 10) + 90} units. Recommend ${pick(['expediting supplier delivery', 'activating backup supplier', 'investigating supply chain delays'])}.`
           },
           {
-            who: pick(['Sarah Kim', 'Mike Rodriguez']),
-            text: `Alert threshold adjusted based on new baseline. ${pick(['P95 latency', 'Error rate', 'Connection pool utilization', 'Cache hit rate'])} threshold updated from ${Math.floor(Math.random() * 100) + 400} to ${Math.floor(Math.random() * 100) + 500} to reduce false positives. Historical data shows this is more appropriate for current traffic patterns.`
+            who: pick(['Sarah Kim', 'Paul Bauer']),
+            text: `Alert threshold adjusted based on new baseline. ${pick(['Line efficiency', 'Defect rate', 'Component inventory', 'Quality pass rate'])} threshold updated from ${Math.floor(Math.random() * 10) + 80}% to ${Math.floor(Math.random() * 10) + 85}% to reduce false positives. Historical data shows this is more appropriate for current production patterns.`
           }
         ]
         return pick(scenarios)
       },
       'chg-review': () => {
         const changeId = Math.floor(Math.random() * 1000) + 1000
+        const plant = pick(['Sindelfingen', 'Tuscaloosa', 'Beijing', 'Pune', 'East London'])
         const scenarios = [
           {
-            who: pick(['Mike Rodriguez', 'Emma Wilson', 'Alex Thompson']),
-            text: `Change request: ${pick(['Scale DB cluster for payment-api', 'Deploy new API version v2.4.1', 'Update CDN configuration', 'Modify load balancer routing rules', 'Update Kubernetes resource limits'])}. Risk level: ${pick(['Low', 'Medium', 'High'])}. Requested by ${pick(['Infrastructure team', 'Engineering team', 'SRE team'])}.`
+            who: pick(['Paul Bauer', 'Emma Wilson', 'Alex Thompson']),
+            text: `Production change request: ${pick(['Modify assembly line configuration for EQS', 'Update quality control thresholds', 'Adjust component sourcing protocol', 'Implement new workstation calibration', 'Update production scheduling algorithm'])} at ${plant} plant. Risk level: ${pick(['Low', 'Medium', 'High'])}. Requested by ${pick(['Production team', 'Quality Control team', 'Engineering team'])}.`
           },
           {
             who: pick(['Emma Wilson', 'Lisa Anderson', 'Chris Martinez']),
-            text: `Reviewed and ${pick(['approved', 'approved with conditions', 'requested more information'])}. ${pick(['Low risk change', 'Standard deployment procedure', 'Requires additional testing', 'Needs rollback plan'])}. ${pick(['Deployment scheduled', 'Pending approval', 'Ready for deployment'])} for ${pick(['2:00 PM UTC', '6:00 PM UTC', '10:00 PM UTC', 'tomorrow morning'])}. See <a href="https://jira.company.com/browse/ENG-${Math.floor(Math.random() * 5000) + 1000}" style="color: #1D9BD1; text-decoration: underline;">JIRA ticket</a> for details.`
+            text: `Reviewed and ${pick(['approved', 'approved with conditions', 'requested more information'])}. ${pick(['Low risk change', 'Standard production procedure', 'Requires additional testing', 'Needs rollback plan'])}. ${pick(['Implementation scheduled', 'Pending approval', 'Ready for implementation'])} for ${pick(['2:00 PM UTC', '6:00 PM UTC', '10:00 PM UTC', 'tomorrow morning'])}. See <a href="https://jira.mercedes-benz.com/browse/PROD-${Math.floor(Math.random() * 5000) + 1000}" target="_blank" rel="noopener noreferrer" style="color: #1D9BD1; text-decoration: underline;">Production ticket</a> for details.`
           },
           {
             who: pick(['Alex Thompson', 'Jordan Lee', 'Eve Park']),
-            text: `Deployment scheduled for ${pick(['2:00 PM UTC', '6:00 PM UTC', '10:00 PM UTC'])}. ${pick(['Rollback plan documented', 'Monitoring in place', 'On-call engineer notified', 'Stakeholders informed'])}. Change window: ${Math.floor(Math.random() * 60) + 30} minutes. <em>Important:</em> All team members should be available during this window.`
+            text: `Implementation scheduled for ${pick(['2:00 PM UTC', '6:00 PM UTC', '10:00 PM UTC'])}. ${pick(['Rollback plan documented', 'Production monitoring in place', 'Plant operations team notified', 'Stakeholders informed'])}. Change window: ${Math.floor(Math.random() * 60) + 30} minutes. <em>Important:</em> All team members should be available during this window.`
           },
           {
-            who: pick(['Mike Rodriguez', 'Sarah Kim']),
-            text: `Change #${changeId} completed successfully ✅ ${pick(['No issues detected', 'All health checks passing', 'Metrics within normal ranges', 'Zero errors in logs'])}. Monitoring for next ${Math.floor(Math.random() * 4) + 2} hours.`
+            who: pick(['Paul Bauer', 'Sarah Kim']),
+            text: `Change #${changeId} completed successfully ✅ ${pick(['No production issues detected', 'All quality checks passing', 'Production metrics within normal ranges', 'Zero defects in post-change inspection'])}. Monitoring for next ${Math.floor(Math.random() * 4) + 2} hours.`
           }
         ]
         return pick(scenarios)
       },
       'dev-ops': () => {
+        const plant = pick(['Sindelfingen', 'Tuscaloosa', 'Beijing', 'Pune', 'East London'])
         const scenarios = [
           {
             who: pick(['Lisa Anderson', 'Chris Martinez', 'Alex Thompson']),
-            text: `New deployment pipeline configured for ${pick(['payment-api', 'user-service', 'notification-service', 'analytics-service'])}. ${pick(['CI/CD tests passing', 'Integration tests green', 'Performance benchmarks met', 'Security scans clean'])}. Ready for ${pick(['production deployment', 'staging deployment', 'beta release'])}.`
+            text: `New production process configured for ${pick(['EQS battery assembly', 'S-Class interior installation', 'C-Class paint application', 'GLE quality inspection', 'E-Class final assembly'])} at ${plant} plant. ${pick(['Quality tests passing', 'Efficiency benchmarks met', 'Safety protocols verified', 'Component integration validated'])}. Ready for ${pick(['production implementation', 'pilot testing', 'full rollout'])}.`
           },
           {
             who: pick(['Chris Martinez', 'Jordan Lee', 'Lisa Anderson']),
-            text: `CI/CD pipeline optimization complete. Build times reduced by ${Math.floor(Math.random() * 30) + 15}% (from ${Math.floor(Math.random() * 20) + 10}min to ${Math.floor(Math.random() * 10) + 5}min). ${pick(['Parallel test execution enabled', 'Docker layer caching optimized', 'Test suite parallelized', 'Build cache implemented'])}.`
+            text: `Production process optimization complete. Cycle time reduced by ${Math.floor(Math.random() * 30) + 15}% (from ${Math.floor(Math.random() * 20) + 10}min to ${Math.floor(Math.random() * 10) + 5}min). ${pick(['Parallel workstation operations enabled', 'Component flow optimized', 'Quality checkpoints streamlined', 'Automation enhanced'])}.`
           },
           {
-            who: pick(['Alex Thompson', 'Mike Rodriguez']),
-            text: `Deployment pipeline running for v${Math.floor(Math.random() * 3) + 2}.${Math.floor(Math.random() * 5)}.${Math.floor(Math.random() * 10)}. ${pick(['Staging deployment successful', 'Smoke tests passing', 'Canary deployment in progress', 'Blue-green deployment initiated'])}. ETA ${Math.floor(Math.random() * 15) + 5} minutes.`
+            who: pick(['Alex Thompson', 'Paul Bauer']),
+            text: `Production process update running for ${pick(['Line 1', 'Line 2', 'Line 3', 'Quality Station A', 'Assembly Station B'])}. ${pick(['Pilot testing successful', 'Quality checks passing', 'Gradual rollout in progress', 'Full implementation initiated'])}. ETA ${Math.floor(Math.random() * 60) + 30} minutes.`
           },
           {
             who: pick(['Lisa Anderson', 'Chris Martinez']),
-            text: `Deployment successful ✅ ${pick(['All services healthy', 'Zero downtime achieved', 'Rollback not required', 'Performance metrics stable'])}. Monitoring continues for next hour.`
+            text: `Production update successful ✅ ${pick(['All production lines healthy', 'Zero quality issues', 'Rollback not required', 'Efficiency metrics stable'])}. Monitoring continues for next shift.`
           }
         ]
         return pick(scenarios)
@@ -1686,7 +1858,12 @@ export default function SlackPage() {
         const hasITSM = descLower.includes('incident') || descLower.includes('itom') || descLower.includes('itsm')
         if (hasITSM) {
           return { 
-            who: pick(people.map(p => p.n).filter(n => n !== getCurrentUser)), 
+            who: pick(people.map(p => p.n).filter(n => {
+              const person = peopleData.find((pp: Person) => pp.name === n)
+              return n !== getCurrentUser && 
+                     person?.role !== 'AI Assistant' && 
+                     person?.role !== 'HR System'
+            })), 
             text: pick([
               'Company-wide update: All systems operational. No active incidents reported',
               'Team announcement: Change management process updated. Review new procedures',
@@ -1705,7 +1882,12 @@ export default function SlackPage() {
         const companyDesc = companyData.description?.toLowerCase() || ''
         if (companyDesc.includes('social') || companyDesc.includes('content') || companyDesc.includes('media')) {
           return {
-            who: pick(people.map(p => p.n).filter(n => n !== getCurrentUser)),
+            who: pick(people.map(p => p.n).filter(n => {
+              const person = peopleData.find((pp: Person) => pp.name === n)
+              return n !== getCurrentUser && 
+                     person?.role !== 'AI Assistant' && 
+                     person?.role !== 'HR System'
+            })),
             text: pick([
               `Video uploads are spiking - we're seeing ${Math.floor(Math.random() * 50) + 20}% more than usual. Might need to scale the processing pipeline`,
               `The new reel feature is getting crazy engagement - ${Math.floor(Math.random() * 40) + 25}% increase in views. Users are loving it`,
@@ -1725,7 +1907,12 @@ export default function SlackPage() {
         const hasITSM = descLower.includes('incident') || descLower.includes('itom') || descLower.includes('itsm')
         if (hasITSM) {
           return { 
-            who: pick(people.map(p => p.n).filter(n => n !== getCurrentUser)), 
+            who: pick(people.map(p => p.n).filter(n => {
+              const person = peopleData.find((pp: Person) => pp.name === n)
+              return n !== getCurrentUser && 
+                     person?.role !== 'AI Assistant' && 
+                     person?.role !== 'HR System'
+            })), 
             text: pick([
               'Monitoring shows all systems operational. No incidents reported',
               'Change request review completed. Ready for deployment',
@@ -2128,36 +2315,36 @@ export default function SlackPage() {
         // Channel-specific messages
         const channelMessages: Record<string, (string | MessageAction[])[][]> = {
         'itom-4412': [
-          ['Rovo', 'Incident #4412 detected: Payment API latency spike. P95 increased from 200ms to 850ms in us-east-1 region.'],
-          ['Alice Carlysle', 'Checking CloudWatch metrics now. Seeing connection pool exhaustion warnings.'],
-          ['Bob Jenkins', 'I can see the DB connection pool is at 98% capacity. Should we scale up?'],
-          ['Rovo', 'Auto-correlation suggests DB pool saturation. Recommending: scale nodes +2, increase pool size 50 → 100.'],
-          ['Carol Diaz', 'On it. Scaling DB cluster now. ETA 5 minutes.'],
+          ['Merc AI', 'Production alert #4412 detected: Assembly line 2 stoppage at Sindelfingen plant. Line efficiency dropped from 92% to 45%. Affecting E-Class production.'],
+          ['Hannah Wolf', 'Checking production monitoring systems. Seeing robotic arm malfunction - current line status: stopped.'],
+          ['Felix Schäfer', 'I can see the welding station is showing equipment error codes. Cycle time increased by 20 seconds. Should we switch to backup equipment?'],
+          ['Merc AI', 'Auto-correlation suggests component supply chain delay. Recommending: activate backup production line. Estimated resolution time: 45 minutes.'],
+          ['Mia Zimmermann', 'On it. Coordinating with maintenance team now. ETA 20 minutes.'],
         ],
         'incidents': [
-          ['Eve Park', 'New incident opened: #4412 - Payment API latency'],
-          ['James Bryant', 'Assigning to on-call engineer.'],
-          ['Rovo', 'Initial assessment: DB connection pool exhaustion. Mitigation in progress.'],
+          ['Eve Park', 'New production incident opened: #4412 - Assembly line stoppage'],
+          ['James Bryant', 'Assigning to production operations team.'],
+          ['Merc AI', 'Initial assessment: Component supply chain interruption. Mitigation in progress.'],
         ],
         'alerts': [
-          ['Rovo', 'Alert: Payment API p95 latency exceeded threshold (850ms > 500ms)'],
-          ['David Chen', 'Acknowledged. Investigating root cause.'],
-          ['Sarah Kim', 'Found connection pool saturation. Scaling infrastructure.'],
+          ['Merc AI', 'Alert: Production line 1 efficiency dropped below threshold (78% < 85%)'],
+          ['Alexander Schneider', 'Acknowledged. Investigating root cause.'],
+          ['Sarah Kim', 'Found component supply shortage. Coordinating with suppliers.'],
         ],
         'chg-review': [
-          ['Mike Rodriguez', 'Change request: Scale DB cluster for payment-api'],
+          ['Paul Bauer', 'Production change request: Modify assembly line configuration for EQS'],
           ['Emma Wilson', 'Reviewed and approved. Low risk change.'],
-          ['Alex Thompson', 'Deployment scheduled for 2:00 PM UTC.'],
+          ['Alex Thompson', 'Implementation scheduled for 2:00 PM UTC.'],
         ],
         'CHG-189': [
-          ['Sarah Kim', 'This change looks risky - we\'re modifying the core authentication flow. Need to be extra careful here.'],
-          ['Mike Rodriguez', 'I agree. The change touches critical user authentication paths. We should have a comprehensive rollback plan.'],
-          ['Emma Wilson', 'I\'ve reviewed the code changes. The risk is medium-high. We need to ensure all edge cases are covered.'],
-          ['Alex Thompson', 'The testing coverage looks good, but I\'m concerned about the impact on existing sessions.'],
-          ['Lisa Anderson', 'We should consider a gradual rollout - maybe 10% first, then 50%, then full deployment.'],
-          ['Chris Martinez', 'Good point. Also need to make sure our monitoring is in place before we deploy.'],
-          ['Jordan Lee', 'I\'ve added additional logging around the auth flow. That should help us catch any issues early.'],
-          ['Eve Park', 'Security team has reviewed and approved, but with conditions - we need to monitor for 48 hours post-deployment.'],
+          ['Sarah Kim', 'This production change looks risky - we\'re modifying the EQS battery assembly process. Need to be extra careful here.'],
+          ['Paul Bauer', 'I agree. The change touches critical production paths. We should have a comprehensive rollback plan.'],
+          ['Emma Wilson', 'I\'ve reviewed the production process changes. The risk is medium-high. We need to ensure all quality checkpoints are covered.'],
+          ['Alex Thompson', 'The quality testing coverage looks good, but I\'m concerned about the impact on current production runs.'],
+          ['Lisa Anderson', 'We should consider a gradual rollout - maybe one production line first, then 50%, then full implementation.'],
+          ['Chris Martinez', 'Good point. Also need to make sure our production monitoring is in place before we implement.'],
+          ['Jordan Lee', 'I\'ve added additional quality checkpoints around the assembly process. That should help us catch any issues early.'],
+          ['Eve Park', 'Quality control team has reviewed and approved, but with conditions - we need to monitor for 48 hours post-implementation.'],
         ],
         'dev-ops': [
           ['Lisa Anderson', 'New deployment pipeline configured for payment-api'],
@@ -2509,24 +2696,51 @@ Together, we're building not just a great company, but a better world. Thank you
         // Individual DM
         const personName = getPersonNameFromChatId(chatId)
         const aiAssistant = peopleData.find((p: Person) => p.role === 'AI Assistant')
-        const aiAssistantName = aiAssistant?.name || 'Rovo'
+        const aiAssistantName = aiAssistant?.name || 'Merc AI'
         const aiAssistantId = aiAssistantName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
         
         // Check if this is AI assistant conversation
-        if (personName === aiAssistantName || chatId === aiAssistantId || chatId === 'rovo' || chatId === 'bottleneckbot' || chatId === 'astra') {
+        if (personName === aiAssistantName || chatId === aiAssistantId || chatId === 'merc-ai' || chatId === 'bottleneckbot' || chatId === 'astra') {
           // Use contextual AI assistant messages - these will be generated properly in generateContextualMessages
           return []
+        } else if (personName === 'Workday' || chatId === 'workday') {
+          // Workday HR app integration - task notifications with manager responses
+          // Shows HR asks sent to manager with their responses/actions
+          // Last message is Workday acknowledging user's response
+          return [
+            ['Workday', '📋 <strong>Leave Request Pending Approval</strong><br><br>Employee: <span style="color: #1D9BD1 !important; font-weight: 600;">Hannah Wolf</span><br>Type: Vacation Leave<br>Start Date: December 20, 2024<br>End Date: December 27, 2024<br>Duration: 5 business days<br><br>Reason: Family holiday vacation.<br><br>This request requires your approval as her manager.'],
+            [currentUserName, 'Approved.'],
+            ['Workday', 'Leave request approved. Hannah Wolf and the HR team have been notified.'],
+            ['Workday', '📋 <strong>Performance Review Due</strong><br><br>Employee: <span style="color: #1D9BD1 !important; font-weight: 600;">Felix Schäfer</span><br>Review Period: Q4 2024<br>Due Date: December 15, 2024<br>Status: Pending manager review.<br><br>Please complete the performance review by the due date.'],
+            [currentUserName, 'Will complete by end of week.'],
+            ['Workday', 'Performance review deadline acknowledged. Reminder will be sent on December 13, 2024.'],
+            ['Workday', '💰 <strong>Expense Report Approval Required</strong><br><br>Employee: <span style="color: #1D9BD1 !important; font-weight: 600;">Mia Zimmermann</span><br>Report ID: EXP-2024-1247<br>Total Amount: €2,450.00<br>Submitted: December 10, 2024<br>Categories:<br>• Business Travel: €1,200.00<br>• Meals & Entertainment: €850.00<br>• Accommodation: €400.00<br><br>This expense report requires your approval before reimbursement processing.'],
+            [currentUserName, 'Approved.'],
+            ['Workday', 'Expense report approved. Finance team has been notified. Reimbursement will be processed within 3-5 business days.'],
+            ['Workday', '📋 <strong>Leave Request Pending Approval</strong><br><br>Employee: <span style="color: #1D9BD1 !important; font-weight: 600;">Mia Zimmermann</span><br>Type: Sick Leave<br>Start Date: November 28, 2024<br>End Date: December 2, 2024<br>Duration: 3 business days<br><br>Reason: Medical appointment and recovery.<br><br>This request requires your approval as her manager.'],
+            [currentUserName, 'Approved.'],
+            ['Workday', 'Leave request approved. Mia Zimmermann and the HR team have been notified.'],
+            ['Workday', '⏰ <strong>Time Entry Approval Required</strong><br><br>Employee: <span style="color: #1D9BD1 !important; font-weight: 600;">Alexander Schneider</span><br>Week Ending: December 8, 2024<br>Total Hours: 42.5<br>Overtime Hours: 2.5<br><br>Time entry requires your approval.'],
+            [currentUserName, 'Approved.'],
+            ['Workday', 'Time entry approved. Payroll has been notified.'],
+            ['Workday', '💰 <strong>Expense Report Approval Required</strong><br><br>Employee: <span style="color: #1D9BD1 !important; font-weight: 600;">Felix Schäfer</span><br>Report ID: EXP-2024-1189<br>Total Amount: €1,850.00<br>Submitted: November 15, 2024<br>Categories:<br>• Business Travel: €1,200.00<br>• Meals: €450.00<br>• Accommodation: €200.00<br><br>This expense report requires your approval before reimbursement processing.'],
+            [currentUserName, 'Request revision. Accommodation expense exceeds policy limit.'],
+            ['Workday', 'Revision requested. Felix Schäfer has been notified to update the expense report.'],
+            ['Workday', '📋 <strong>Leave Request Pending Approval</strong><br><br>Employee: <span style="color: #1D9BD1 !important; font-weight: 600;">Hannah Wolf</span><br>Type: Personal Leave<br>Start Date: November 5, 2024<br>End Date: November 6, 2024<br>Duration: 2 business days<br>Reason: Personal matters.<br><br>This request requires your approval as her manager.'],
+            [currentUserName, 'Rejected. Conflicts with critical production schedule.'],
+            ['Workday', 'Leave request rejected. Hannah Wolf has been notified.'],
+          ]
         } else if (personName) {
           return [
-            [personName, 'Hey! How\'s it going?'],
-            [currentUserName, 'Pretty good!'],
-            [personName, 'Thanks for your help earlier!'],
+            [personName, pick(['Hey! How\'s production going?', 'Hi! Any updates on the assembly line?', 'Hello! How are things at the plant?', 'Hey! How\'s the quality control going?'])],
+            [currentUserName, pick(['Pretty good!', 'All systems operational!', 'Running smoothly!', 'Going well!'])],
+            [personName, pick(['Thanks for your help with the production issue earlier!', 'Appreciate your support on the quality control review!', 'Thanks for coordinating the supplier delivery!', 'Thanks for your help!'])],
             [currentUserName, 'No problem!'],
-            [personName, 'Let me know if you need anything else.'],
+            [personName, pick(['Let me know if you need anything else.', 'Keep me posted on any production updates.', 'Reach out if you need support with the plant operations.'])],
           ]
         }
       }
-      return [['Alice Carlysle', 'Hey!']]
+      return [['Hannah Wolf', 'Hey!']]
     }
     
     const templates = getMessageTemplates()
@@ -2541,28 +2755,28 @@ Together, we're building not just a great company, but a better world. Thank you
         {
           id: 'CHG-189-1',
           who: 'Sarah Kim',
-          text: 'This change looks risky - we\'re modifying the core authentication flow. Need to be extra careful here.',
+          text: 'This production change looks risky - we\'re modifying the EQS battery assembly process. Need to be extra careful here.',
           when: new Date(baseTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
           _timestamp: baseTime
         } as SlackMsg & { _timestamp: number },
         {
           id: 'CHG-189-2',
-          who: 'Mike Rodriguez',
-          text: 'I agree. The change touches critical user authentication paths. We should have a comprehensive rollback plan.',
+          who: 'Paul Bauer',
+          text: 'I agree. The change touches critical production paths. We should have a comprehensive rollback plan.',
           when: new Date(baseTime + 300000).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
           _timestamp: baseTime + 300000
         } as SlackMsg & { _timestamp: number },
         {
           id: 'CHG-189-3',
           who: 'Emma Wilson',
-          text: 'I\'ve reviewed the code changes. The risk is medium-high. We need to ensure all edge cases are covered.',
+          text: 'I\'ve reviewed the production process changes. The risk is medium-high. We need to ensure all quality checkpoints are covered.',
           when: new Date(baseTime + 600000).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
           _timestamp: baseTime + 600000
         } as SlackMsg & { _timestamp: number },
         {
           id: 'CHG-189-4',
           who: 'Alex Thompson',
-          text: 'The testing coverage looks good, but I\'m concerned about the impact on existing sessions.',
+          text: 'The quality testing coverage looks good, but I\'m concerned about the impact on current production runs.',
           when: new Date(baseTime + 900000).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
           _timestamp: baseTime + 900000
         } as SlackMsg & { _timestamp: number },
@@ -2599,14 +2813,48 @@ Together, we're building not just a great company, but a better world. Thank you
     
     // Generate messages across multiple days - ensure at least 40 messages total
     // For DMs and group DMs, ensure even more for realistic conversations
-    const minMessages = isDM || isGroupDM ? 50 : 40
+    // Get person name early to check for Workday
+    const personName = isDM && !isGroupDM ? getPersonNameFromChatId(chatId) : null
+    // CRITICAL: Workday uses fixed templates only - don't generate extra messages
+    const isWorkdayChat = (personName === 'Workday' || chatId === 'workday')
+    // General channel is quiet - only generate a few messages (5-8 total)
+    const minMessages = isWorkdayChat ? templates.length : (chatId === 'general' ? Math.floor(Math.random() * 4) + 5 : (isDM || isGroupDM ? 50 : 40))
     let totalMessagesGenerated = 0
     
     // Get all participants for this chat
     let participants: string[] = []
     if (isChannel) {
-      // For channels, use all people (excluding current user for now, they'll be added naturally)
-      participants = people.map(p => p.n).filter(n => n !== getCurrentUser)
+      // For general channel, restrict to executives, managers, and leadership roles only
+      if (chatId === 'general') {
+        const allowedRoles = ['Head of', 'Manager', 'VP', 'Director', 'Chief', 'Executive', 'Product Manager', 'Engineering Manager']
+        participants = people
+          .map(p => p.n)
+          .filter(n => {
+            const person = getPerson(n)
+            const role = person?.role || ''
+            return n !== getCurrentUser && 
+                   person?.role !== 'AI Assistant' && 
+                   person?.role !== 'HR System' &&
+                   (allowedRoles.some(allowedRole => role.includes(allowedRole)) || 
+                    role.includes('Manager') || 
+                    role.includes('Head'))
+          })
+        // If no managers found, fallback to a few key people
+        if (participants.length === 0) {
+          participants = people
+            .map(p => p.n)
+            .filter(n => {
+              const person = getPerson(n)
+              return n !== getCurrentUser && 
+                     person?.role !== 'AI Assistant' && 
+                     person?.role !== 'HR System' &&
+                     (n.includes('James') || n.includes('Emma') || n.includes('Lisa') || n.includes('James Bryant'))
+            })
+        }
+      } else {
+        // For other channels, use all people (excluding current user for now, they'll be added naturally)
+        participants = people.map(p => p.n).filter(n => n !== getCurrentUser)
+      }
     } else if (isGroupDM) {
       // Get actual group members from channel-config.json
       const groupDMConfig = (channelConfig.groupDMs as Array<{ id: string; name: string; members?: string[] }> | undefined)?.find(g => g.id === chatId)
@@ -2619,7 +2867,6 @@ Together, we're building not just a great company, but a better world. Thank you
       }
     } else {
       // 1:1 DM - both participants
-      const personName = getPersonNameFromChatId(chatId)
       if (personName) {
         participants = [personName, getCurrentUser]
       } else {
@@ -2637,7 +2884,13 @@ Together, we're building not just a great company, but a better world. Thank you
         // Increase message count to ensure we reach minimum
         let messagesPerDay: number
         if (chatId === 'general') {
-          messagesPerDay = Math.floor(Math.random() * 4) + 2 // 2-5 per day for general (longer messages)
+          // General channel is quiet - only 1 message every 3-5 days (very infrequent)
+          // Use a deterministic but sparse pattern to keep it quiet
+          const daysSinceStart = Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
+          // Post on days 0, 4, 9, 14, 19, etc. (roughly every 4-5 days)
+          const postInterval = 4 + (daysSinceStart % 2) // Alternates between 4 and 5 days
+          const shouldPost = daysSinceStart % postInterval === 0 && daysSinceStart >= 0
+          messagesPerDay = shouldPost ? 1 : 0 // Only 1 message when posting
         } else if (chatId === 'CHG-189') {
           // CHG-189 has 8 pre-existing discussion messages - only generate on first day
           if (currentDate.getTime() === startDate.getTime()) {
@@ -2652,7 +2905,16 @@ Together, we're building not just a great company, but a better world. Thank you
         } else if (isGroupDM) {
           messagesPerDay = Math.floor(Math.random() * 8) + 5 // 5-12 per day for group DMs (more active)
         } else {
-          messagesPerDay = Math.floor(Math.random() * 7) + 4 // 4-10 per day for 1:1 DMs (more conversation)
+          // Workday uses templates only - generate all templates on first day
+          if (isWorkdayChat) {
+            if (currentDate.getTime() === startDate.getTime()) {
+              messagesPerDay = templates.length // Use all templates on first day only
+            } else {
+              messagesPerDay = 0 // No messages on other days for Workday
+            }
+          } else {
+            messagesPerDay = Math.floor(Math.random() * 7) + 4 // 4-10 per day for 1:1 DMs (more conversation)
+          }
         }
         
         // If we're below minimum, increase messages for this day
@@ -2775,7 +3037,34 @@ Together, we're building not just a great company, but a better world. Thank you
           } else if (isDM && !isGroupDM) {
             // Use contextual DM generator for individual DMs - proper back-and-forth
             const personName = getPersonNameFromChatId(chatId)
-            if (personName) {
+            
+            // CRITICAL: Check if this is Workday - use templates directly, don't generate dynamically
+            if (personName === 'Workday' || chatId === 'workday') {
+              // Use Workday templates directly from getMessageTemplates()
+              if (templates.length > 0 && templateIndex < templates.length) {
+                const template = templates[templateIndex]
+                templateIndex++
+                who = template[0] as string
+                text = template[1] as string
+                // Handle actions if present (third element)
+                if (template.length > 2 && template[2]) {
+                  const actions = template[2] as unknown as MessageAction[]
+                  messages.push({
+                    id: `${chatId}-${messageId++}`,
+                    who: template[0] as string,
+                    text: template[1] as string,
+                    when: msgTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+                    actions,
+                    _timestamp: msgTime.getTime()
+                  } as SlackMsg & { _timestamp: number })
+                  continue // Skip the normal message creation below
+                }
+              } else {
+                // Fallback if templates exhausted
+                who = getNextParticipant()
+                text = 'No pending HR tasks.'
+              }
+            } else if (personName) {
               const msg = generateContextualDMMessage(personName, currentUserName, messages, pick)
               who = msg.who
               text = msg.text
@@ -2904,16 +3193,40 @@ Together, we're building not just a great company, but a better world. Thank you
           
           // Find person object
           const person = people.find(p => p.n === who) || people[0]
+          const personObj = getPerson(who)
           
           // Enhance message based on person traits (skip for HTML/rich text)
           if (!text.includes('<strong>') && !text.includes('<br>')) {
-            const personObj = getPerson(who)
             text = enhanceMessage(text, personObj || { name: who, avatar: person.a }, pick)
           }
           
           // Add reactions to interesting/notable messages across all chats
+          // Skip reactions for bot/system accounts (Workday, Merc AI) and Workday chat entirely
+          const isBotAccount = personObj?.role === 'AI Assistant' || personObj?.role === 'HR System' || who === 'Workday' || who === 'Merc AI'
+          const isWorkdayChat = chatId === 'workday' || chatId?.toLowerCase().includes('workday')
+          
           let reactions: Record<string, number> | undefined = undefined
           const textWithoutHtml = text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').toLowerCase()
+          
+          // NO reactions in Workday chat - it's a system chat
+          if (isWorkdayChat) {
+            reactions = undefined
+          }
+          // General channel messages ALWAYS get reactions (they're all company-wide announcements)
+          else if (chatId === 'general' && !isBotAccount) {
+            reactions = getReactionsForMessage(text, chatId, chatName, pick, who) || {}
+            // Ensure general channel messages have at least 3-6 reactions
+            if (Object.keys(reactions).length === 0) {
+              const reactionEmojis = ['👍', '❤️', '🎉', '🔥', '👏', '😮', '🙏', '✅', '🚀', '💯']
+              const numReactions = Math.floor(Math.random() * 4) + 3 // 3-6 reactions
+              for (let i = 0; i < numReactions; i++) {
+                const emoji = pick(reactionEmojis.filter(e => !reactions![e]))
+                if (emoji) {
+                  reactions![emoji] = Math.floor(Math.random() * 5) + 2 // 2-6 reactions per emoji
+                }
+              }
+            }
+          }
           
           // Determine if message is interesting based on content and context
           const isInteresting = (): boolean => {
@@ -2977,7 +3290,13 @@ Together, we're building not just a great company, but a better world. Thank you
             return false
           }
           
-          if (isInteresting()) {
+          // Don't add reactions to bot/system account messages
+          // General channel reactions are already set above, so skip this logic for general
+          if (chatId === 'general') {
+            // Reactions already set above for general channel - keep them
+          } else if (isBotAccount) {
+            reactions = undefined
+          } else if (isInteresting()) {
             reactions = {}
             const reactionEmojis: string[] = []
             
@@ -3272,25 +3591,25 @@ Together, we're building not just a great company, but a better world. Thank you
       }
     }
     
-    // CRITICAL: For Rovo/AI Assistant chats, ensure conversation always ends with Rovo's response
+    // CRITICAL: For Merc AI/AI Assistant chats, ensure conversation always ends with Merc AI's response
     const aiAssistant = peopleData.find((p: Person) => p.role === 'AI Assistant')
-    const aiAssistantName = aiAssistant?.name || 'Rovo'
+    const aiAssistantName = aiAssistant?.name || 'Merc AI'
     const aiAssistantId = aiAssistantName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-    const isRovoChat = (isDM && !isGroupDM && (chatId === aiAssistantId || chatId === 'rovo' || chatId === 'bottleneckbot' || chatId === 'astra'))
+    const isMercAIChat = (isDM && !isGroupDM && (chatId === aiAssistantId || chatId === 'merc-ai' || chatId === 'bottleneckbot' || chatId === 'astra'))
     
-    if (isRovoChat && messages.length > 0) {
+    if (isMercAIChat && messages.length > 0) {
       const lastMessage = messages[messages.length - 1]
-      // If last message is from user, add Rovo's response
+      // If last message is from user, add Merc AI's response
       if (lastMessage.who === currentUserName) {
-        const rovoResponse = generateAIAssistantMessage(currentUserName, messages, companyData.description || '', companyData.name || '', companyData.industry || '', pick)
-        const rovoMsgTime = new Date(endDate)
-        rovoMsgTime.setHours(16, 30, 0, 0)
+        const mercAIResponse = generateAIAssistantMessage(currentUserName, messages, companyData.description || '', companyData.name || '', companyData.industry || '', pick)
+        const mercAIMsgTime = new Date(endDate)
+        mercAIMsgTime.setHours(16, 30, 0, 0)
         messages.push({
           id: `${chatId}-${messageId++}`,
-          who: rovoResponse.who,
-          text: rovoResponse.text,
-          when: rovoMsgTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
-          _timestamp: rovoMsgTime.getTime()
+          who: mercAIResponse.who,
+          text: mercAIResponse.text,
+          when: mercAIMsgTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+          _timestamp: mercAIMsgTime.getTime()
         } as SlackMsg & { _timestamp: number })
       }
     }
@@ -3343,25 +3662,25 @@ Together, we're building not just a great company, but a better world. Thank you
     }
   }, [showReactionPicker])
 
-  // Keyboard shortcut: Press 'P' to trigger Rovo's message in CHG-189
+  // Keyboard shortcut: Press 'P' to trigger Merc AI's message in CHG-189 or Workday leave request
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      // Only trigger if not typing in an input/textarea and P key is pressed
+      // Only trigger if not typing in an input/textarea
       const target = e.target as HTMLElement
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return
       
       if (e.key === 'p' || e.key === 'P') {
         if (selectedChat === 'CHG-189') {
-          // Check if Rovo's message already exists
+          // Check if Merc AI's message already exists
           const currentMessages = chatMessages['CHG-189'] || []
-          const rovoMessageExists = currentMessages.some(m => 
-            m.who === 'Rovo' && m.text.includes('Risk validation complete')
+          const mercAIMessageExists = currentMessages.some(m => 
+            m.who === 'Merc AI' && m.text.includes('Risk validation complete')
           )
           
-          if (!rovoMessageExists) {
-            const rovoMessage: SlackMsg = {
-              id: `CHG-189-rovo-${Date.now()}`,
-              who: 'Rovo',
+          if (!mercAIMessageExists) {
+            const mercAIMessage: SlackMsg = {
+              id: `CHG-189-merc-ai-${Date.now()}`,
+              who: 'Merc AI',
               text: `Risk validation complete. All 4 risk pillars are showing 🟢 green status:<br><br>🟢 Technical<br>🟢 Operational<br>🟢 Compliance<br>🟢 Business<br><br>I've validated the usual risk procedures across all pillars.<br><br>🔒 <em>Only <span style="color: #1D9BD1 !important; font-weight: 600;">@JamesMc</span> can approve this change.</em>`,
               when: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
               actions: [
@@ -3385,10 +3704,78 @@ Together, we're building not just a great company, but a better world. Thank you
             setTimeout(() => {
               setChatMessages(prev => {
                 const current = prev['CHG-189'] || []
-                return { ...prev, 'CHG-189': [...current, rovoMessage] }
+                return { ...prev, 'CHG-189': [...current, mercAIMessage] }
               })
             }, 200)
           }
+        } else if (selectedChat === 'workday' || selectedChat?.toLowerCase().includes('workday')) {
+          // Allow unlimited leave requests - they can be from different employees
+          const leaveRequestMessage: SlackMsg = {
+              id: `workday-leave-request-${Date.now()}`,
+              who: 'Workday',
+              text: `📋 <strong>Leave Request Pending Approval</strong><br><br>Employee: <span style="color: #1D9BD1 !important; font-weight: 600;">Hannah Wolf</span><br>Type: Vacation Leave<br>Start Date: December 20, 2024<br>End Date: December 27, 2024<br>Duration: 5 business days<br><br>Reason: Family holiday vacation<br><br>This request requires your approval as her manager.`,
+              when: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+              actions: [
+                {
+                  id: 'approve-leave',
+                  label: 'Approve',
+                  type: 'primary' as const,
+                  emoji: '✅',
+                  confirmationText: '<em>You have approved the leave request. Hannah Wolf and the HR team have been notified.</em>'
+                },
+                {
+                  id: 'reject-leave',
+                  label: 'Reject',
+                  type: 'secondary' as const,
+                  confirmationText: '<em>You have rejected the leave request. Hannah Wolf has been notified.</em>'
+                }
+              ]
+            }
+            
+            setTimeout(() => {
+              setChatMessages(prev => {
+                const current = prev['workday'] || []
+                return { ...prev, 'workday': [...current, leaveRequestMessage] }
+              })
+            }, 200)
+        }
+      } else if (e.key === 'q' || e.key === 'Q') {
+        if (selectedChat === 'workday' || selectedChat?.toLowerCase().includes('workday')) {
+          // Allow unlimited expense requests - they can be from different employees
+          const expenseRequestMessage: SlackMsg = {
+              id: `workday-expense-request-${Date.now()}`,
+              who: 'Workday',
+              text: `💰 <strong>Expense Report Approval Required</strong><br><br>Employee: <span style="color: #1D9BD1 !important; font-weight: 600;">Felix Schäfer</span><br>Report ID: EXP-2024-1247<br>Total Amount: €2,450.00<br>Submitted: December 10, 2024<br><br>Categories:<br>• Business Travel: €1,200.00<br>• Meals & Entertainment: €850.00<br>• Accommodation: €400.00<br><br>This expense report requires your approval before reimbursement processing.`,
+              when: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+              actions: [
+                {
+                  id: 'approve-expense',
+                  label: 'Approve',
+                  type: 'primary' as const,
+                  emoji: '✅',
+                  confirmationText: '<em>You have approved the expense report. Finance team has been notified and reimbursement will be processed within 3-5 business days.</em>'
+                },
+                {
+                  id: 'request-revision',
+                  label: 'Request Revision',
+                  type: 'secondary' as const,
+                  confirmationText: '<em>You have requested revision of the expense report. Felix Schäfer has been notified.</em>'
+                },
+                {
+                  id: 'reject-expense',
+                  label: 'Reject',
+                  type: 'secondary' as const,
+                  confirmationText: '<em>You have rejected the expense report. Felix Schäfer has been notified.</em>'
+                }
+              ]
+            }
+            
+            setTimeout(() => {
+              setChatMessages(prev => {
+                const current = prev['workday'] || []
+                return { ...prev, 'workday': [...current, expenseRequestMessage] }
+              })
+            }, 200)
         }
       }
     }
@@ -3429,7 +3816,7 @@ Together, we're building not just a great company, but a better world. Thank you
     // Get all chat IDs statically (don't depend on unreadCounts)
     const allChatIds = [
       'itom-4412', 'incidents', 'alerts',
-      'rovo', 'alice', 'bob', 'carol', 'eve', 'james', 'priya', 'david', 'sarah', 'mike',
+      'merc-ai', 'hannah', 'felix', 'mia', 'eve', 'james', 'priya', 'alexander', 'sarah', 'paul',
       'group-1', 'group-2', 'group-3', 'group-4', 'group-5',
       'chg-review', 'CHG-189', 'dev-ops', 'general', 'engineering', 'backend', 'frontend', 'infrastructure',
       'security', 'sre', 'oncall', 'deployments', 'monitoring', 'ci-cd', 'kubernetes', 'aws',
@@ -3445,9 +3832,9 @@ Together, we're building not just a great company, but a better world. Thank you
       let p = pick(getOtherPeople)
       let text = ''
       
-      if (chatId === 'rovo') {
-        // Special handling for Rovo
-        p = people.find(pp => pp.n === 'Rovo') || p
+      if (chatId === 'merc-ai') {
+        // Special handling for Merc AI
+        p = people.find(pp => pp.n === 'Merc AI') || p
         text = pick([
           `I've updated the analysis for incident #4412.`,
           `New recommendations available based on latest metrics.`,
@@ -3556,16 +3943,16 @@ Together, we're building not just a great company, but a better world. Thank you
           }
         }
         
-        // Pick a random chat (excluding currently selected one and CHG-189 if Rovo's message already exists)
+        // Pick a random chat (excluding currently selected one and CHG-189 if Merc AI's message already exists)
         const availableChats = allChatIds.filter(id => {
           if (id === selectedChat) return false
-          // Exclude CHG-189 if Rovo's message with actions already exists
+          // Exclude CHG-189 if Merc AI's message with actions already exists
           if (id === 'CHG-189') {
             const chgMessages = chatMessages['CHG-189'] || []
-            const rovoMessageExists = chgMessages.some(m => 
-              m.who === 'Rovo' && m.text.includes('Risk validation complete')
+            const mercAIMessageExists = chgMessages.some(m => 
+              m.who === 'Merc AI' && m.text.includes('Risk validation complete')
             )
-            return !rovoMessageExists
+            return !mercAIMessageExists
           }
           return true
         })
@@ -3663,9 +4050,9 @@ Together, we're building not just a great company, but a better world. Thank you
       let p = pick(getOtherPeople)
       let text = ''
       
-      if (selectedChat === 'rovo') {
-        // Special handling for Rovo
-        p = people.find(pp => pp.n === 'Rovo') || p
+      if (selectedChat === 'merc-ai') {
+        // Special handling for Merc AI
+        p = people.find(pp => pp.n === 'Merc AI') || p
         text = pick([
           `I've updated the analysis for incident #4412.`,
           `New recommendations available based on latest metrics.`,
@@ -3806,47 +4193,7 @@ Together, we're building not just a great company, but a better world. Thank you
     }
   }, [chatMessages[selectedChat]?.length, selectedChat])
 
-  // Background process: Slowly toggle users between online/offline status
-  useEffect(() => {
-    const userIds = ['rovo', 'alice', 'bob', 'carol', 'eve', 'james', 'priya', 'david', 'sarah', 'mike']
-    
-    const toggleOnlineStatus = () => {
-      // Randomly select 1-2 users to toggle (slow process)
-      const numToToggle = Math.random() < 0.7 ? 1 : 2 // 70% chance of 1, 30% chance of 2
-      const shuffled = [...userIds].sort(() => Math.random() - 0.5)
-      const usersToToggle = shuffled.slice(0, numToToggle)
-      
-      setOnlineStatus(prev => {
-        const updated = { ...prev }
-        usersToToggle.forEach(userId => {
-          // Toggle the status
-          updated[userId] = !prev[userId]
-        })
-        return updated
-      })
-    }
-    
-    // Initial delay: wait 3-5 minutes before first toggle
-    const initialDelay = Math.random() * 120000 + 180000 // 3-5 minutes in milliseconds
-    
-    let intervalId: NodeJS.Timeout | null = null
-    
-    const initialTimeout = setTimeout(() => {
-      toggleOnlineStatus()
-      
-      // Then toggle every 4-7 minutes
-      intervalId = setInterval(() => {
-        toggleOnlineStatus()
-      }, Math.random() * 180000 + 240000) // 4-7 minutes in milliseconds
-    }, initialDelay)
-    
-    return () => {
-      clearTimeout(initialTimeout)
-      if (intervalId) {
-        clearInterval(intervalId)
-      }
-    }
-  }, []) // Empty dependency array - only run once on mount
+  // Online/offline statuses are now static - no dynamic updates after initial load
 
   const handleSendMessage = () => {
     if (!messageInput.trim() || !selectedChat) return
@@ -4031,8 +4378,8 @@ Together, we're building not just a great company, but a better world. Thank you
     if (selectedChat === 'CHG-189' && actionId === 'approve-change') {
       const followUpMessages: SlackMsg[] = [
         {
-          id: `CHG-189-rovo-followup-${Date.now()}`,
-          who: 'Rovo',
+          id: `CHG-189-merc-ai-followup-${Date.now()}`,
+          who: 'Merc AI',
           text: `🎉 Change approved! The team can proceed with the rollout. All risk validations are complete and stakeholders have been notified.<br><br>Thank you <span style="color: #1D9BD1 !important; font-weight: 600;">@JamesMc</span> for upholding our high standards and ensuring safe, validated changes move forward. This is exactly the kind of rigor that keeps our systems stable and our deployments smooth. Let's ship it! 🚀`,
           when: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
         },
@@ -4044,8 +4391,8 @@ Together, we're building not just a great company, but a better world. Thank you
         },
         {
           id: `CHG-189-congrats-2-${Date.now()}`,
-          who: 'Mike Rodriguez',
-          text: `Appreciate the thorough review process. Thanks for pushing this through <span style="color: #1D9BD1 !important; font-weight: 600;">@JamesMc</span>! Let's get this deployed! 🚀`,
+          who: 'Paul Bauer',
+          text: `Appreciate the thorough review process. Thanks for pushing this through <span style="color: #1D9BD1 !important; font-weight: 600;">@JamesMc</span>! Let's get this implemented! 🚀`,
           when: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
         },
         {
@@ -4057,14 +4404,14 @@ Together, we're building not just a great company, but a better world. Thank you
       ]
       
       // Add messages with delays for natural flow (longer delays for organic feel)
-      const rovoMessageId = followUpMessages[0].id
+      const mercAIMessageId = followUpMessages[0].id
       setTimeout(() => {
         setChatMessages(prev => {
           const current = prev['CHG-189'] || []
           return { ...prev, 'CHG-189': [...current, followUpMessages[0]] }
         })
         
-        // Add organic reactions to Rovo's message
+        // Add organic reactions to Merc AI's message
         // First reaction appears after 2000ms (increased delay)
         setTimeout(() => {
           // Capture scroll position before state update
@@ -4072,7 +4419,7 @@ Together, we're building not just a great company, but a better world. Thank you
           
           setChatMessages(prev => {
             const current = prev['CHG-189'] || []
-            const messageIndex = current.findIndex(m => m.id === rovoMessageId)
+            const messageIndex = current.findIndex(m => m.id === mercAIMessageId)
             if (messageIndex === -1) return prev
             
             const message = current[messageIndex]
@@ -4098,7 +4445,7 @@ Together, we're building not just a great company, but a better world. Thank you
             
             setChatMessages(prev => {
               const current = prev['CHG-189'] || []
-              const messageIndex = current.findIndex(m => m.id === rovoMessageId)
+              const messageIndex = current.findIndex(m => m.id === mercAIMessageId)
               if (messageIndex === -1) return prev
               
               const message = current[messageIndex]
@@ -4125,7 +4472,7 @@ Together, we're building not just a great company, but a better world. Thank you
             
             setChatMessages(prev => {
               const current = prev['CHG-189'] || []
-              const messageIndex = current.findIndex(m => m.id === rovoMessageId)
+              const messageIndex = current.findIndex(m => m.id === mercAIMessageId)
               if (messageIndex === -1) return prev
               
               const message = current[messageIndex]
@@ -4151,7 +4498,7 @@ Together, we're building not just a great company, but a better world. Thank you
               
               setChatMessages(prev => {
                 const current = prev['CHG-189'] || []
-                const messageIndex = current.findIndex(m => m.id === rovoMessageId)
+                const messageIndex = current.findIndex(m => m.id === mercAIMessageId)
                 if (messageIndex === -1) return prev
                 
                 const message = current[messageIndex]
@@ -4177,7 +4524,7 @@ Together, we're building not just a great company, but a better world. Thank you
                 
                 setChatMessages(prev => {
                   const current = prev['CHG-189'] || []
-                  const messageIndex = current.findIndex(m => m.id === rovoMessageId)
+                  const messageIndex = current.findIndex(m => m.id === mercAIMessageId)
                   if (messageIndex === -1) return prev
                   
                   const message = current[messageIndex]
@@ -4205,7 +4552,7 @@ Together, we're building not just a great company, but a better world. Thank you
               
               setChatMessages(prev => {
                 const current = prev['CHG-189'] || []
-                const messageIndex = current.findIndex(m => m.id === rovoMessageId)
+                const messageIndex = current.findIndex(m => m.id === mercAIMessageId)
                 if (messageIndex === -1) return prev
                 
                 const message = current[messageIndex]
@@ -4231,7 +4578,7 @@ Together, we're building not just a great company, but a better world. Thank you
                 
                 setChatMessages(prev => {
                   const current = prev['CHG-189'] || []
-                  const messageIndex = current.findIndex(m => m.id === rovoMessageId)
+                  const messageIndex = current.findIndex(m => m.id === mercAIMessageId)
                   if (messageIndex === -1) return prev
                   
                   const message = current[messageIndex]
@@ -5290,8 +5637,8 @@ Together, we're building not just a great company, but a better world. Thank you
                             }
                           })()}
                         </div>
-                        {/* Status circle - green for online, grey for offline */}
-                        {(chat.isOnline !== undefined && !chat.isOnline) ? (
+                        {/* Status circle - green for online, grey for offline (only show for real people, not system accounts) */}
+                        {chat.isOnline !== undefined && (chat.isOnline === false) ? (
                           <>
                             {/* Outer circle - mask/background */}
                             <div
@@ -5329,7 +5676,7 @@ Together, we're building not just a great company, but a better world. Thank you
                               />
                             </div>
                           </>
-                        ) : (
+                        ) : chat.isOnline === true ? (
                           <div
                             className="green-dot"
                             style={{
@@ -5345,7 +5692,7 @@ Together, we're building not just a great company, but a better world. Thank you
                               zIndex: 2,
                             }}
                           />
-                        )}
+                        ) : null}
                       </div>
                     )}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
@@ -5618,8 +5965,8 @@ Together, we're building not just a great company, but a better world. Thank you
                         )
                       }
                     })()}
-                    {/* Status circle - green for online, grey for offline */}
-                    {(currentChat?.isOnline !== undefined && !currentChat.isOnline) ? (
+                    {/* Status circle - green for online, grey for offline (only show for real people, not system accounts) */}
+                    {currentChat?.isOnline !== undefined && currentChat.isOnline === false ? (
                       <>
                         {/* Outer circle - mask/background */}
                         <div
@@ -5655,7 +6002,7 @@ Together, we're building not just a great company, but a better world. Thank you
                           />
                         </div>
                       </>
-                    ) : (
+                    ) : currentChat?.isOnline === true ? (
                       <div
                         style={{
                           position: 'absolute',
@@ -5671,7 +6018,7 @@ Together, we're building not just a great company, but a better world. Thank you
                           boxSizing: 'border-box',
                         }}
                       />
-                    )}
+                    ) : null}
                   </div>
                 ) : isGroupDM ? (
                   // Multiple avatars for group DM (show first 3, overlapping)
@@ -5751,8 +6098,8 @@ Together, we're building not just a great company, but a better world. Thank you
                             {getInitials(member.name)}
                           </div>
                         )}
-                        {/* Status circle - green for online, grey for offline */}
-                        {(member.isOnline !== undefined && !member.isOnline) ? (
+                        {/* Status circle - green for online, grey for offline (only show for real people, not system accounts) */}
+                        {member.isOnline !== undefined && member.isOnline === false ? (
                           <>
                             {/* Outer circle - mask/background */}
                             <div
@@ -5788,7 +6135,7 @@ Together, we're building not just a great company, but a better world. Thank you
                               />
                             </div>
                           </>
-                        ) : (
+                        ) : member.isOnline === true ? (
                           <div
                             style={{
                               position: 'absolute',
@@ -5804,7 +6151,7 @@ Together, we're building not just a great company, but a better world. Thank you
                               boxSizing: 'border-box',
                             }}
                           />
-                        )}
+                        ) : null}
                       </div>
                     ))
                   })()
@@ -6095,7 +6442,8 @@ Together, we're building not just a great company, but a better world. Thank you
             <div style={{ display: 'flex', flexDirection: 'column', marginTop: 'auto' }}>
               {chatMessages[selectedChat].map((m, idx) => {
                 const prevMsg = idx > 0 ? chatMessages[selectedChat][idx - 1] : null
-                const showAvatar = !prevMsg || prevMsg.who !== m.who
+                // Always show avatar for every message, even back-to-back messages from the same person
+                const showAvatar = true
                 const p = people.find(pp => pp.n === m.who)
                 const isLastMessage = idx === chatMessages[selectedChat].length - 1
                 return (
@@ -6382,32 +6730,46 @@ Together, we're building not just a great company, but a better world. Thank you
                       >
                         {(() => {
                           const avatar = getAvatar(m.who)
+                          const initials = getInitials(m.who)
+                          const person = getPerson(m.who)
+                          
                           if (avatar) {
-                            return <img src={avatar} alt={m.who} width={38} height={38} style={{ borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} onError={(e) => {
-                              // If image fails to load, show initials
-                              const target = e.target as HTMLImageElement
-                              target.style.display = 'none'
-                              const parent = target.parentElement
-                              if (parent && !parent.querySelector('.avatar-initials')) {
-                                const initialsDiv = document.createElement('div')
-                                initialsDiv.className = 'avatar-initials'
-                                initialsDiv.textContent = getInitials(m.who)
-                                initialsDiv.style.cssText = `
-                                  width: 38px;
-                                  height: 38px;
-                                  border-radius: 8px;
-                                  background: ${getAvatarColor(m.who)};
-                                  color: white;
-                                  display: flex;
-                                  align-items: center;
-                                  justify-content: center;
-                                  font-weight: 600;
-                                  font-size: 14px;
-                                  flex-shrink: 0;
-                                `
-                                parent.appendChild(initialsDiv)
-                              }
-                            }} />
+                            return <img 
+                              src={avatar} 
+                              alt={m.who} 
+                              width={38} 
+                              height={38} 
+                              style={{ borderRadius: 8, objectFit: 'cover', flexShrink: 0, display: 'block' }} 
+                              onError={(e) => {
+                                // If image fails to load, show initials fallback
+                                console.error('Avatar failed to load:', avatar, 'for', m.who)
+                                const target = e.target as HTMLImageElement
+                                target.style.display = 'none'
+                                const parent = target.parentElement
+                                if (parent && !parent.querySelector('.avatar-initials')) {
+                                  const initialsDiv = document.createElement('div')
+                                  initialsDiv.className = 'avatar-initials'
+                                  initialsDiv.textContent = initials
+                                  initialsDiv.style.cssText = `
+                                    width: 38px;
+                                    height: 38px;
+                                    border-radius: 8px;
+                                    background: ${getAvatarColor(m.who)};
+                                    color: white;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    font-weight: 600;
+                                    font-size: 14px;
+                                    flex-shrink: 0;
+                                  `
+                                  parent.appendChild(initialsDiv)
+                                }
+                              }}
+                              onLoad={() => {
+                                console.log('Avatar loaded successfully:', avatar, 'for', m.who)
+                              }}
+                            />
                           } else {
                             return (
                               <div style={{
@@ -6423,7 +6785,7 @@ Together, we're building not just a great company, but a better world. Thank you
                                 fontSize: 14,
                                 flexShrink: 0
                               }}>
-                                {getInitials(m.who)}
+                                {initials}
                               </div>
                             )
                           }
@@ -6548,16 +6910,16 @@ Together, we're building not just a great company, but a better world. Thank you
                         // Replace placeholder with actual actor name if needed
                         const confirmationText = completedAction.confirmationText.replace('{actor}', currentUserName)
                         return (
-                          <div style={{ 
-                            marginTop: 12,
-                            fontSize: 14,
-                            fontStyle: 'italic',
-                            color: currentTheme.type === 'light' ? '#868686' : '#9ca3af',
-                            fontFamily: 'Lato, sans-serif',
-                            lineHeight: 1.4,
-                          }}>
-                            {confirmationText}
-                          </div>
+                          <div 
+                            style={{ 
+                              marginTop: 12,
+                              fontSize: 14,
+                              color: currentTheme.type === 'light' ? '#868686' : '#9ca3af',
+                              fontFamily: 'Lato, sans-serif',
+                              lineHeight: 1.4,
+                            }}
+                            dangerouslySetInnerHTML={{ __html: confirmationText }}
+                          />
                         )
                       })()}
                       {m.reactions && Object.keys(m.reactions).length > 0 && (

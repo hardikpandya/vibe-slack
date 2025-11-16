@@ -140,13 +140,23 @@ a[href]:not(.no-underline-link):hover {
   text-decoration: underline !important;
 }
 
-/* Message content links - ensure pointer cursor and underline on hover */
+/* Message content links - ensure they're visible and clickable */
 .message-content a {
-  cursor: pointer;
+  cursor: pointer !important;
+  color: #1D9BD1 !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
 }
 .message-content a:hover {
-  cursor: pointer;
+  cursor: pointer !important;
   text-decoration: underline !important;
+  color: #1D9BD1 !important;
+}
+.message-content a:visited {
+  color: #1D9BD1 !important;
+}
+.message-content a:active {
+  color: #0d7bb8 !important;
 }
 
 /* @-tags (mentions) should behave like links */

@@ -1,6 +1,6 @@
 import peopleData from '../people.json'
 
-export type EmbedType = 'notion' | 'figma' | 'jira' | 'confluence' | 'loom'
+export type EmbedType = 'notion' | 'figma' | 'jira' | 'confluence' | 'loom' | 'workday'
 
 export interface EmbedConfig {
   type: EmbedType
@@ -186,6 +186,22 @@ const titleGenerators = {
       'Technical Demo: Performance Optimization'
     ]
     return titles[seed % titles.length]
+  },
+  
+  workday: (url: string, seed: number): string => {
+    const titles = [
+      'Employee Profile: Production Team Member',
+      'Performance Review: Manufacturing Operations',
+      'Time Tracking: Plant Operations Schedule',
+      'Payroll Report: Global Manufacturing Team',
+      'Employee Directory: Engineering Department',
+      'Benefits Enrollment: Q4 Open Enrollment',
+      'Training Record: Quality Control Certification',
+      'Workforce Analytics: Production Efficiency Report',
+      'Recruitment: Plant Operations Positions',
+      'Employee Development: Career Growth Plan'
+    ]
+    return titles[seed % titles.length]
   }
 }
 
@@ -251,11 +267,23 @@ export const EMBED_CONFIGS: Record<EmbedType, EmbedTypeConfig> = {
       thumbnailUrl: '/assets/loom-thumbnail.jpg'
     },
     titleExtractor: titleGenerators.loom
+  },
+  
+  workday: {
+    type: 'workday',
+    regex: /https?:\/\/[^\s<>"']*workday[^\s<>"']*\/[^\s<>"']+/gi,
+    appInfo: {
+      name: 'Workday',
+      icon: '💼',
+      color: '#FF6B35',
+      logoUrl: '/assets/workday.png'
+    },
+    titleExtractor: titleGenerators.workday
   }
 }
 
 // Get deterministic owner name from people.json based on URL hash
-// If forcedOwner is provided, use that instead (for Rovo-created documents)
+// If forcedOwner is provided, use that instead (for Merc AI-created documents)
 const getOwnerForUrl = (url: string, forcedOwner?: string): string => {
   if (forcedOwner) {
     return forcedOwner
@@ -277,15 +305,16 @@ const getOwnerForUrl = (url: string, forcedOwner?: string): string => {
  */
 export const detectEmbedLinks = (text: string, messageSender?: string): EmbedConfig[] => {
   const embeds: EmbedConfig[] = []
+  const seenUrls = new Set<string>() // Track URLs to prevent duplicates
   
   // Include all embed types
-  const displayableTypes: EmbedType[] = ['notion', 'figma', 'loom', 'jira', 'confluence']
+  const displayableTypes: EmbedType[] = ['notion', 'figma', 'loom', 'jira', 'confluence', 'workday']
   
-  // Check if message sender is AI Assistant (Rovo or any AI Assistant)
+  // Check if message sender is AI Assistant (Merc AI or any AI Assistant)
   const allPeople = (peopleData as Person[])
   const aiAssistant = allPeople.find(p => p.role === 'AI Assistant')
-  const aiAssistantName = aiAssistant?.name || 'Rovo'
-  const isFromAI = messageSender === aiAssistantName || messageSender === 'Rovo'
+  const aiAssistantName = aiAssistant?.name || 'Merc AI'
+  const isFromAI = messageSender === aiAssistantName || messageSender === 'Merc AI'
   
   // Get current user name (the person marked as "me")
   const currentUser = allPeople.find(p => p.me === true)
@@ -301,11 +330,17 @@ export const detectEmbedLinks = (text: string, messageSender?: string): EmbedCon
     const matches = text.match(config.regex)
     if (matches) {
       matches.forEach(url => {
+        // Skip if we've already seen this URL (prevent duplicate embeds)
+        if (seenUrls.has(url)) {
+          return
+        }
+        seenUrls.add(url)
+        
         const seed = getUrlSeed(url)
         const title = config.titleExtractor(url, seed)
         
         // If message is from AI Assistant and it's a Confluence link, use current user as owner
-        // (because Rovo creates documents on behalf of the user)
+        // (because Merc AI creates documents on behalf of the user)
         let owner: string
         if (isFromAI && config.type === 'confluence') {
           owner = currentUserName
