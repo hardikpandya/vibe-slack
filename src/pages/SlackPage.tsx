@@ -3197,7 +3197,15 @@ Together, we're building not just a great company, but a better world. Thank you
           
           // Enhance message based on person traits (skip for HTML/rich text)
           if (!text.includes('<strong>') && !text.includes('<br>')) {
-            text = enhanceMessage(text, personObj || { name: who, avatar: person.a }, pick)
+            const fallbackPerson: Person = personObj || { 
+              name: who, 
+              avatar: person.a || '', 
+              initials: getInitials(who),
+              gender: 'male',
+              country: '',
+              role: ''
+            }
+            text = enhanceMessage(text, fallbackPerson, pick)
           }
           
           // Add reactions to interesting/notable messages across all chats
@@ -3578,7 +3586,15 @@ Together, we're building not just a great company, but a better world. Thank you
         const person = people.find(p => p.n === who) || people[0]
         const personObj = getPerson(who)
         if (!text.includes('<strong>') && !text.includes('<br>')) {
-          text = enhanceMessage(text, personObj || { name: who, avatar: person.a }, pick)
+          const fallbackPerson: Person = personObj || { 
+            name: who, 
+            avatar: person.a || '', 
+            initials: getInitials(who),
+            gender: 'male',
+            country: '',
+            role: ''
+          }
+          text = enhanceMessage(text, fallbackPerson, pick)
         }
         
         messages.push({
@@ -3901,7 +3917,15 @@ Together, we're building not just a great company, but a better world. Thank you
       const personObj = getPerson(p.n)
       
       // Enhance message based on person traits
-      text = enhanceMessage(text, personObj || { name: p.n, avatar: p.a }, pick)
+      const fallbackPerson: Person = personObj || { 
+        name: p.n, 
+        avatar: p.a || '', 
+        initials: getInitials(p.n),
+        gender: 'male',
+        country: '',
+        role: ''
+      }
+      text = enhanceMessage(text, fallbackPerson, pick)
       
       return {
         id: Math.random().toString(36).slice(2),
@@ -4132,7 +4156,15 @@ Together, we're building not just a great company, but a better world. Thank you
       const personObj = getPerson(p.n)
       
       // Enhance message based on person traits
-      text = enhanceMessage(text, personObj || { name: p.n, avatar: p.a }, pick)
+      const fallbackPerson: Person = personObj || { 
+        name: p.n, 
+        avatar: p.a || '', 
+        initials: getInitials(p.n),
+        gender: 'male',
+        country: '',
+        role: ''
+      }
+      text = enhanceMessage(text, fallbackPerson, pick)
       
       return {
         id: Math.random().toString(36).slice(2),
